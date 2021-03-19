@@ -1,0 +1,26 @@
+{
+  "name": "todolist",
+  "version": "1.0.0",
+  "description": "A simple todo app made for The Odin Project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hoistyr/todoList.git"
+  },
+  "author": "Hoistyr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Hoistyr/todoList/issues"
+  },
+  "homepage": "https://github.com/Hoistyr/todoList#readme",
+  "devDependencies": {
+    "webpack": "^5.26.3",
+    "webpack-cli": "^4.5.0"
+  },
+  "dependencies": {
+    "date-fns": "^2.19.0"
+  }
+}
