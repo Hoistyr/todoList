@@ -1,44 +1,127 @@
-html, body {
+html, body, #content {
     margin: 0;
     padding: 0;
-    background-color: #f2f0f0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
     height: 100%;
     width: 100%;
-    box-sizing: border-box;
 }
 
 #content {
     height: 100%;
-    width: 100%;
     display: flex;
     flex-direction: row;
+    background-color: #1d2025;
+    overflow: hidden;
 }
 
-#taskList {
+#todoList {
     height: 100%;
-    width: 55%;
-    border-right: solid 0.008px #7794a0;
+    width: 65%;
 }
 
-#taskListNav {
+#todoListNav {
     margin: 0;
-    padding: 0;
-    height: auto;
-    display: flex;
+    padding: 20px;
+    padding-left: 50px;
+    padding-right: 50px;
+    height: 100px;
+    align-items: center;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 50px 50px;
+    grid-column-gap: 10px;
+    grid-template-areas:
+    'hamburgerNav projectName'
+    'searchBar searchBar';
+    
 }
 
 .hamburgerNavIcon {
-    width: auto;
-    padding: 10px;
-}
-
-#taskInformation {
-    height: 100%;
-    width: 45%;
-
-    border-left: solid 0.08px #7794a0;
-}
-.blueLine {
-    background-color: #55808e;
     height: 20px;
+    width: auto;
+    grid-area: hamburgerNav;
 }
+
+.hamburgerNavIcon:hover {
+    cursor: pointer;
+}
+
+#todoListProjectName {
+    color: #cbd2d9;
+    margin: 0px;
+    padding: 0px;
+    grid-area: projectName;
+    font-size: 1.75rem;
+}
+
+#newTodoInput {
+    background-color: #202932;
+    height: 50px;
+    width: 100%;
+    box-sizing: border-box;
+    border: transparent;
+    color:#cbd2d9;
+    font-size: 1rem;
+    padding: 25px;
+    grid-area: searchBar;
+    border-radius: 25px;
+    margin-top: 20px;
+}
+
+#newTodoInput:focus {
+    border: transparent;
+    outline: none;
+}
+
+#todoListTodosHolder {
+    margin: 0;
+    padding: 20px;
+    padding-left: 50px;
+    padding-right: 50px;
+    height: 100%;
+}
+
+.todo {
+    color: #cbd2d9;
+    font-size: 1.05rem;
+    border-bottom: solid 1.5px #cbd2d93a;
+    display: flex;
+    align-items: center;
+    text-align: start;
+    height: auto;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.todo:hover {
+    cursor: pointer;
+    background-color: #3e4c5936;
+    transition: 0.75s;
+}
+
+.todoText {
+    margin:0px;
+    padding: 0px;
+    font-family: 'Nunito', sans-serif;
+    width: 100%;
+}
+
+.todoDueDate {
+    text-align: end;
+    width: auto;
+    margin-right: 20px;
+}
+
+.removeX {
+    height: 12px;
+    width: auto;
+}
+
+#todoInformation {
+    height: 100%;
+    width: 35%;
+    background-color: #1d2025;
+    border-left: solid .0025rem #1f2933;
+}
+
