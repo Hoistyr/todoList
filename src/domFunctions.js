@@ -2,18 +2,78 @@ import {format} from 'date-fns';
 
 const createIninitalPageStructure = () => {
     const content = document.querySelector('#content');
+    
+    const projectSideList = document.createElement('div');
+    projectSideList.id = 'projectSideList';
+
     const todoList = document.createElement('div');
     todoList.id = 'todoList';
+    
     const todoInformation = document.createElement('div');
     todoInformation.id='todoInformation';
-    content.append(todoList, todoInformation);
+    
+    content.append(projectSideList, todoList, todoInformation);
 
+    //Hidden project sidebar
+    createProjectListStructure();
+    
     //Todo list
     createTodoListStructure();
     
     //Todo information
     createTodoInformationStructure();
 }
+
+const createProjectListStructure = () => {
+    const projectSideList = document.getElementById('projectSideList');
+    
+    const sideBarList = document.createElement('ul');
+    sideBarList.id = 'sideBarList';
+    projectSideList.appendChild(sideBarList);
+    
+    populateProjectList();
+}
+
+const populateProjectList = () => {
+    //Will eventually take an array of projects and add them to the list
+    const sideBarList = document.getElementById('sideBarList');
+    
+    const projectListAllToDos = document.createElement('h1');
+    projectListAllToDos.id = 'projectListAllToDos';
+    projectListAllToDos.classList.add('projectListText', 'projectListTitle', 'sideBarList');
+    projectListAllToDos.textContent = `All ToDo's`;
+    sideBarList.appendChild(projectListAllToDos);
+    
+    const projectListTitle = document.createElement('h1');
+    projectListTitle.classList.add('projectListText', 'projectListTitle', 'sideBarList');
+    projectListTitle.textContent = 'Projects';
+    sideBarList.appendChild(projectListTitle);
+
+    const projectList = document.createElement('ul');
+    projectList.id = 'projectList';
+    sideBarList.appendChild(projectList);
+}
+
+const hideProjectSideList = () => {
+    const projectSideList = document.getElementById('projectSideList');
+    projectSideList.classList.remove('visibleSideBar');
+    projectSideList.classList.add('hiddenSideBar');
+
+    console.log('removeeventlistener')
+    const hamburgerNavIcon = document.querySelector('.hamburgerNavIcon');
+    hamburgerNavIcon.removeEventListener('click', hideProjectSideList);
+    hamburgerNavIcon.addEventListener('click', revealProjectSideList);
+}
+
+const revealProjectSideList = () => {
+    const projectSideList = document.getElementById('projectSideList');
+    projectSideList.classList.remove('hiddenSideBar');
+    projectSideList.classList.add('visibleSideBar');
+
+    const hamburgerNavIcon = document.querySelector('.hamburgerNavIcon');
+    hamburgerNavIcon.removeEventListener('click', revealProjectSideList);
+    hamburgerNavIcon.addEventListener('click', hideProjectSideList);
+} 
 
 const createTodoListStructure = () => {
     //Creates the divs
@@ -39,6 +99,8 @@ const populateTodoListNav = () => {
     hamburgerNavIcon.classList.add('hamburgerNavIcon');
     hamburgerNavIcon.src = '../src/images/icons/hamburgerNavIcon.svg'
     todoListNav.appendChild(hamburgerNavIcon);
+
+    hamburgerNavIcon.addEventListener('click', hideProjectSideList);
     
     const todoListProjectName = document.createElement('h1');
     todoListProjectName.id = 'todoListProjectName';
