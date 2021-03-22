@@ -16,7 +16,7 @@ html, body, #content {
 }
 
 #projectSideList {
-    width: 30%;
+    width: 12%;
     height: 100%;
     background-color: #202932;
     display: flex;
@@ -27,25 +27,42 @@ html, body, #content {
 #projectSideList.hiddenSideBar {
     transform: translate(-999px, 0px);
     width:0%;
-    transition: 1.24s;
+    transition: 1s;
 }
 
 #projectSideList.visibleSideBar {
-    transition: 1.24s;
+    transition: 0.8s;
 }
 
 #sideBarList {
     margin: 0px;
     padding: 0px;
-    padding-top: 75px;
-    padding-left:15px;
+    margin-top: 75px;
+    width: 100%;
 }
 
-.projectListTitle {
+h1.projectListTitle {
     color: #cbd2d9;
-    margin: 0px;
-    padding-bottom: 20px;
     font-size: 1.5rem;
+    margin: 0px;
+    margin-right: 0px;
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+h1.projectListTitle:hover {
+    cursor: pointer;
+    background-color: #3e4c5936;
+    transition: 0.75s;
+    padding-left:20px;
+}
+
+.projectListItem {
+    color: #cbd2d9;
+    list-style-type: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.10rem;
 }
 
 #todoList {
@@ -159,3 +176,8 @@ html, body, #content {
     border-left: solid .0025rem #1f2933;
 }
 
+@media only screen and (max-width: 1000px) {
+    #projectSideList {
+        width: 25%;
+    }
+}

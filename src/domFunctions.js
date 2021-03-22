@@ -1,4 +1,5 @@
 import {format} from 'date-fns';
+import {todoItem as item, todoProject as project, buildDefaultProject, allProjects} from './todoLogic.js'
 
 const createIninitalPageStructure = () => {
     const content = document.querySelector('#content');
@@ -15,7 +16,7 @@ const createIninitalPageStructure = () => {
     content.append(projectSideList, todoList, todoInformation);
 
     //Hidden project sidebar
-    createProjectListStructure();
+    createProjectSideListStructure();
     
     //Todo list
     createTodoListStructure();
@@ -24,17 +25,17 @@ const createIninitalPageStructure = () => {
     createTodoInformationStructure();
 }
 
-const createProjectListStructure = () => {
+const createProjectSideListStructure = () => {
     const projectSideList = document.getElementById('projectSideList');
     
     const sideBarList = document.createElement('ul');
     sideBarList.id = 'sideBarList';
     projectSideList.appendChild(sideBarList);
     
-    populateProjectList();
+    populateProjectSideList();
 }
 
-const populateProjectList = () => {
+const populateProjectSideList = () => {
     //Will eventually take an array of projects and add them to the list
     const sideBarList = document.getElementById('sideBarList');
     
@@ -52,6 +53,8 @@ const populateProjectList = () => {
     const projectList = document.createElement('ul');
     projectList.id = 'projectList';
     sideBarList.appendChild(projectList);
+
+    populateProjectList();
 }
 
 const hideProjectSideList = () => {
@@ -73,7 +76,32 @@ const revealProjectSideList = () => {
     const hamburgerNavIcon = document.querySelector('.hamburgerNavIcon');
     hamburgerNavIcon.removeEventListener('click', revealProjectSideList);
     hamburgerNavIcon.addEventListener('click', hideProjectSideList);
-} 
+}
+
+const populateProjectList = () => {
+    const projectList = document.querySelector('#projectList');
+
+    console.log(allProjects.list);
+    allProjects.list.forEach((project) => {
+        const sideBarProject = document.createElement('li');
+        sideBarProject.classList.add('projectListItem');
+        console.log(project.projectName);
+        sideBarProject.textContent = `${project.projectName}`;
+        projectList.appendChild(sideBarProject);
+    })
+    
+    // const allProjects = document.createElement('li');
+    // allProjects.classList.add('projectListItem');
+    // allProjects.textContent = 'All Projects'
+    // projectList.appendChild(allProjects);
+    
+
+
+    // 
+    // exampleProject.classList.add('projectListItem');
+    // exampleProject.textContent = 'Example Project'
+    // projectList.appendChild(exampleProject);
+}
 
 const createTodoListStructure = () => {
     //Creates the divs
@@ -115,6 +143,13 @@ const populateTodoListNav = () => {
     todoListNav.appendChild(newTodoInput);
 
     newTodoInput.addEventListener('click', removeDefaultInput);
+    newTodoInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && (newTodoInput.value !== '' && newTodoInput.value !== 'Enter a new ToDo item')) {
+            getNewTodoInputValue();
+        }
+        
+        
+    })
 
 }
 
@@ -126,6 +161,14 @@ const removeDefaultInput = () => {
         newTodoInput.value = ''
         newTodoInput.removeEventListener('click', removeDefaultInput);
     }
+}
+
+const getNewTodoInputValue = () => {
+    console.log('made it');
+    const newTodoInput = document.getElementById('newTodoInput');
+    const toDoTitle = newTodoInput.value;
+    console.log(toDoTitle);
+    newTodoInput.value = '';
 }
 
 const populateTodoListTodosHolder = () => {
