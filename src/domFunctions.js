@@ -1,5 +1,5 @@
 import {format} from 'date-fns';
-import {todoItem as item, todoProject as project, buildDefaultProject, allProjects} from './todoLogic.js'
+import * as toDo from './todoLogic.js'
 
 const createIninitalPageStructure = () => {
     const content = document.querySelector('#content');
@@ -78,30 +78,91 @@ const revealProjectSideList = () => {
     hamburgerNavIcon.addEventListener('click', hideProjectSideList);
 }
 
+//Builds the side project list using the allProjects array in todoLogic.js
 const populateProjectList = () => {
     const projectList = document.querySelector('#projectList');
-
-    console.log(allProjects.list);
-    allProjects.list.forEach((project) => {
+    
+    
+    
+    toDo.allProjects.list.forEach((project) => {
         const sideBarProject = document.createElement('li');
         sideBarProject.classList.add('projectListItem');
-        console.log(project.projectName);
         sideBarProject.textContent = `${project.projectName}`;
         projectList.appendChild(sideBarProject);
     })
-    
-    // const allProjects = document.createElement('li');
-    // allProjects.classList.add('projectListItem');
-    // allProjects.textContent = 'All Projects'
-    // projectList.appendChild(allProjects);
-    
 
+    const newProjectButtonHolder = document.createElement('li');
+    newProjectButtonHolder.id = 'newProjectButtonHolder';
+    projectList.appendChild(newProjectButtonHolder);
+    
+    const newProjectButton = document.createElement('div');
+    newProjectButton.id = 'newProjectButton';
+    newProjectButton.innerHTML = `<p class='buttonText'>New Project</p>`;
+    newProjectButtonHolder.appendChild(newProjectButton);
 
-    // 
-    // exampleProject.classList.add('projectListItem');
-    // exampleProject.textContent = 'Example Project'
-    // projectList.appendChild(exampleProject);
+    newProjectButton.addEventListener('click', openNewProjectCreator);
 }
+
+const openNewProjectCreator = () => {
+    const newProjectButtonHolder = document.getElementById('newProjectButtonHolder');
+    const newProjectButton = document.getElementById('newProjectButton');
+    newProjectButton.removeEventListener('click', openNewProjectCreator);
+    newProjectButton.innerHTML = `<p class='buttonText'>Add Project</p>`;
+    
+    const newProjectCreator = document.createElement('div');
+    newProjectCreator.id = 'newProjectCreator';
+    newProjectCreator.innerHTML = `<input id='newProjectNameInput' value='Enter project name'></input>`
+    newProjectButtonHolder.insertAdjacentElement('beforebegin', newProjectCreator);
+
+    const newProjectNameInput = document.getElementById('newProjectNameInput');
+    newProjectNameInput.addEventListener('focus', removeDefaultProjectInput);
+    newProjectNameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && (newProjectNameInput.value !== '' && newProjectNameInput.value !== 'Enter project name')) {
+            addNewProject();
+        }
+        
+        
+    })
+    newProjectButton.addEventListener('click', addNewProject);
+
+}
+
+const addNewProject = () => {
+    const projectName = getNewProjectValue();
+    console.log(projectName);
+    let newProject = new toDo.project(projectName);
+    console.log(newProject);
+    toDo.projectList.addNew(newProject);
+    
+    resetNewProjectButton();
+    populateProjectList();
+    
+    
+    
+}
+
+const resetNewProjectButton = () => {
+    
+}
+
+const removeDefaultProjectInput = () => {
+    const newProjectNameInput = document.getElementById('newProjectNameInput');
+    let inputText = newProjectNameInput.value;
+    if (inputText === 'Enter project name') {
+        console.log('clearing input');
+        newProjectNameInput.value = ''
+        newProjectNameInput.removeEventListener('focus', removeDefaultProjectInput);
+    }
+}
+
+const getNewProjectValue = () => {
+    console.log('made it');
+    const newProjectNameInput = document.getElementById('newProjectNameInput');
+    const projectName = newProjectNameInput.value;
+    return projectName;
+}
+
+
 
 const createTodoListStructure = () => {
     //Creates the divs
