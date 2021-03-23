@@ -64,6 +64,10 @@ h1.projectListTitle:hover {
     width: 100%;
 }
 
+#projectList.hidden {
+    transform: translate(0px, -999px);
+}
+
 .projectListItem {
     color: #cbd2d9;
     list-style-type: none;
@@ -77,8 +81,6 @@ h1.projectListTitle:hover {
 .projectListItem:hover {
     cursor: pointer;
     background-color: #3e4c5936;
-    transition: 0.75s;
-    padding-left:40px;
 }
 
 #newProjectButtonHolder {
@@ -254,6 +256,27 @@ h1.projectListTitle:hover {
     background-color: #1d2025;
     border-left: solid .0025rem #1f2933;
 }
+
+.projectDivName {
+    color:#cbd2d9cb;
+    margin: 0px;
+    padding: 0px;
+    border-bottom: solid 1.5px #cbd2d93a; 
+}
+
+h1.viewingContent, p.viewingContent, li.viewingContent {
+    padding-left: 16px;
+    border-left: solid 4px #cbd2d9;
+}
+
+h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
+    padding-left: 16px;
+    background-color: #202932;
+    transition: none;
+}
+
+
+
 
 @media only screen and (max-width: 1000px) {
     #projectSideList {

@@ -2,6 +2,8 @@ class todoProject {
     constructor (projectName) {
         this.projectName = projectName;
         this.toDoList = [];
+        this.doneList = [];
+        this.projectID = 'pID:' + makeID(16);
     }
 }
 
@@ -9,10 +11,11 @@ class todoItem {
     constructor (title, dueDate, project, priority) {
         this.title = title || 'No title';
         this.dueDate = dueDate || 'none';
-        this.project = project || 'defaultProject';
+        this.project = project || 'Inbox';
         this.priority = priority || 'none';
-        this.todoID = 'TDID:' + makeID(16);
+        this.todoID = 'tdID:' + makeID(16);
         this.notes = '';
+        this.state = 'notDone';
     }
 
     makeNotes(noteText) {
@@ -34,23 +37,23 @@ const makeID = (length) => {
     
 }
 
-const buildDefaultProject = (() => {
-    const projectSetup = () => {
-        let defaultProject = new todoProject ('All Projects');
+const buildInbox = (() => {
+    const create = () => {
+        let inbox = new todoProject ('Inbox');
         
         // ! Remove these in the future
         for (let i = 0; i < 3; i++) {
-            const exampleToDo = new todoItem ();
-            exampleToDo.project = defaultProject;
-            
-            defaultProject.toDoList.push(exampleToDo);
+            const exampleToDo = new todoItem ('Example todo');
+            exampleToDo.project = inbox;
+            console.log(inbox.toDoList);
+            inbox.toDoList.push(exampleToDo);
         }
-        projectList.addNew(defaultProject);
+        projectList.addNew(inbox);
+        
     }
 
     return {
-        projectSetup,
-
+        create,
     }
 })();
 
@@ -83,5 +86,13 @@ const allProjects = (() => {
     }
 })();
 
+//Master list of all the todos
+const allTodos = (() => {
+    let list = [];
+    return {
+        list,
+    }
+})();
 
-export {todoItem as item, todoProject as project, buildDefaultProject, projectList, allProjects}
+
+export {todoItem as item, todoProject as project, buildInbox, projectList, allProjects, allTodos}
