@@ -201,6 +201,7 @@ h1.projectListTitle:hover {
     margin-top: 20px;
     font-family: 'Nunito', sans-serif;
     z-index: 99;
+    position: relative;
 }
 
 #newTodoInput:focus {
@@ -235,8 +236,21 @@ h1.projectListTitle:hover {
     align-items: center;
     text-align: start;
     height: auto;
-    padding: 10px;
+    justify-content: center;
     box-sizing: border-box;
+    z-index: 5;
+}
+
+.todoPriorityLow {
+    border-left:solid 3px #1FDE6D;
+}
+
+.todoPriorityMedium {
+    border-left: solid 3px#1F91DE;
+}
+
+.todoPriorityHigh {
+    border-left: solid 3px #1FDECC;
 }
 
 .todo:hover {
@@ -245,11 +259,19 @@ h1.projectListTitle:hover {
     transition: 0.75s;
 }
 
+.todoMain {
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    display: flex;
+}
+
 .todoText {
     margin:0px;
     padding: 0px;
     font-family: 'Nunito', sans-serif;
-    width: 100%;
+    height: 100%;
+    width: fit-content;
 }
 
 .todoDueDate {
@@ -259,15 +281,8 @@ h1.projectListTitle:hover {
 }
 
 .removeX {
-    height: 12px;
-    width: auto;
-}
-
-#todoInformation {
-    height: 100%;
-    width: 35%;
-    background-color: #1d2025;
-    border-left: solid .0025rem #1f2933;
+    margin: 0px;
+    padding-right: 5px;
 }
 
 .projectDivName {
@@ -293,11 +308,155 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
     transition: none;
 }
 
+#todoInformation {
+    height: 100%;
+    width: 35%;
+    background-color: #1d2025;
+    border-left: solid .0025rem #1f2933;
+    color: #cbd2d9;
+}
 
+#todoInformationHeader {
+    background-color: #202932;
+    height: 15%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#todoInformationTitle {
+    background-color: transparent;
+    font: inherit;
+    font-size: 1rem;
+    color: inherit;
+    border: solid transparent;
+    text-align: center;
+    width: auto;
+}
+
+#todoInformationTitle:focus {
+    border: transparent;
+    outline: none;
+}
+
+#todoInformationContent {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+#todoPrioritySelectorDiv {
+    display: flex;
+    background-color: #202932;
+    margin-top: 10px;
+    margin-left: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 20px;
+    border-radius: 25px;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+#todoPrioritySelectorDiv:hover {
+    cursor: pointer;
+} 
+
+#todoPrioritySelectorDiv.selectingPriority {
+    width: 52%;
+    height: auto;
+    padding-bottom: 15px;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin: 10px;
+    padding: 10px;
+}
+
+#prioritySelectorMarks {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0px;
+    padding: 0px;
+}
+
+.priorityMark {
+    margin: 1px;
+    font-size: 1.25rem;
+}
+
+#prioritySelectorChoices {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.priorityButton {
+    margin: 4px;
+    padding: 8px;
+    font-size: 1.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 20px;
+    border-radius: 25px;
+}
+
+#priorityNone {
+    background-color: #515a61;
+}
+
+#priorityLow {
+    background-color: #1FDE6D;
+    color: #202932;
+}
+
+#priorityMedium {
+    background-color: #1F91DE;
+    color: #202932;
+}
+
+#priorityHigh {
+    background-color: #1FDECC;
+    color: #202932;
+    height:fit-content;
+}
+
+#todoInformationNotes {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin:10px;
+}
+
+#todoInformationNotesName {
+    margin: 0px;
+}
+
+#todoInformationNotesText {
+    margin: 0px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+#todoInformationFooter {
+    background-color: #202932;
+    height: 15%;
+}
 
 
 @media only screen and (max-width: 1000px) {
     #projectSideList {
         width: 30%;
+    }
+    #todoPrioritySelectorDiv.selectingPriority {
+        width: 80%;
     }
 }

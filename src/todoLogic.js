@@ -12,7 +12,7 @@ class todoItem {
         this.title = title || 'No title';
         this.dueDate = dueDate || 'none';
         this.project = project || 'Inbox';
-        this.priority = priority || 'none';
+        this.priority = priority || 'Low';
         this.todoID = 'tdID:' + makeID(16);
         this.notes = '';
         this.state = 'notDone';
@@ -45,8 +45,10 @@ const buildInbox = (() => {
         for (let i = 0; i < 3; i++) {
             const exampleToDo = new todoItem ('Example todo');
             exampleToDo.project = inbox;
+            exampleToDo.notes = 'Hello there. General Kenobi, ah what a pleasant surprise. *cough cough*'
             console.log(inbox.toDoList);
             inbox.toDoList.push(exampleToDo);
+            toDoList.addNew(exampleToDo);
         }
         projectList.addNew(inbox);
     }

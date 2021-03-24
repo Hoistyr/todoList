@@ -458,11 +458,18 @@ const buildTodoItem = (task, project) => {
     const currentToDoList = document.querySelector(`#${project.projectName}ToDoList`);
     
     const currentTodo = document.createElement('div');
-    currentTodo.classList.add('todo');
+    currentTodo.classList.add('todo', `todoPriority${task.priority}`);
+    currentTodo.dataset.todoid = task.todoID;
+    
+    const todoMain = document.createElement('div');
+    todoMain.classList.add('todoMain');
+    currentTodo.appendChild(todoMain);
+    
     const todoText = document.createElement('p');
     todoText.classList.add('todoText');
     todoText.textContent = task.title;
-    currentTodo.appendChild(todoText);
+    todoMain.appendChild(todoText);
+    
     const dueDate = task.dueDate;
     if (!dueDate === 'none') {
         // const currentDate = format(new Date(), 'MM/dd/yyyy');
@@ -472,17 +479,143 @@ const buildTodoItem = (task, project) => {
         // dueDate.textContent = currentDate;
         // currentTodo.appendChild(dueDate);
     }
-    const removeX = document.createElement('img');
-    removeX.src = '../src/images/icons/removeX.svg';
+    const removeX = document.createElement('p');
+    //removeX.src = '../src/images/icons/removeX.svg';
+    removeX.textContent = 'X';
     removeX.classList.add('removeX');
     currentTodo.appendChild(removeX);
+    removeX.addEventListener('click', deleteToDoItem);
+    
     currentToDoList.appendChild(currentTodo);
+    todoMain.addEventListener('click', populateToDoInformation);
 } 
 
 
+const deleteToDoItem = (event) => {
+    console.log(event);
+}
+
 const createTodoInformationStructure = () => {
     const todoInformation = document.querySelector('#todoInformation');
+    const todoInformationHeader = document.createElement('div');
+    todoInformationHeader.id = 'todoInformationHeader';
+    todoInformation.appendChild(todoInformationHeader);
+
+    const todoInformationContent = document.createElement('div');
+    todoInformationContent.id = 'todoInformationContent';
+    todoInformation.appendChild(todoInformationContent);
+
+
+    const todoInformationFooter = document.createElement('div');
+    todoInformationFooter.id = 'todoInformationFooter';
+    todoInformation.appendChild(todoInformationFooter);
     
+}
+
+const getToDo = (event) => {
+    let toDoItem = '';
+    let clickedToDoId = event.target.parentNode.dataset.todoid;
+    if (clickedToDoId === undefined) {
+        clickedToDoId = (event.target.parentNode).parentNode.dataset.todoid;
+    }
+    
+    console.log('id next');
+    console.log(clickedToDoId);
+    
+    const setToDo = (task) => {
+        toDoItem = task;
+    }
+    
+    toDo.allTodos.list.forEach(task => {
+        if (task.todoID === clickedToDoId) {
+            setToDo(task);
+        }
+    });
+
+   if (toDoItem !== '') {
+       return toDoItem;
+   }
+}
+
+const populateToDoInformation = (event) => {
+    console.log('made it');
+    let task = getToDo(event);
+    console.log(task);
+    const todoInformationHeader = document.querySelector('#todoInformationHeader');
+    const todoMain = event.target;
+    todoMain.removeEventListener('click', populateToDoInformation);
+    
+    const todoInformationTitle = document.createElement('input');
+    todoInformationTitle.id = 'todoInformationTitle';
+    todoInformationTitle.type = 'text';
+    todoInformationTitle.defaultValue = task.title;
+    todoInformationHeader.appendChild(todoInformationTitle);
+
+    const todoInformationContent = document.querySelector('#todoInformationContent');
+    const todoPrioritySelectorDiv = document.createElement('div');
+    todoPrioritySelectorDiv.id = 'todoPrioritySelectorDiv';
+    todoInformationContent.appendChild(todoPrioritySelectorDiv);
+    todoPrioritySelectorDiv.innerHTML = 
+    `<div id='prioritySelectorMarks'>
+        <p id='priorityMark1' class='priorityMark'>!</p>
+        <p id='priorityMark2' class='priorityMark'>!</p>
+        <p id='priorityMark3' class='priorityMark'>!</p>
+    </div>`;
+    todoPrioritySelectorDiv.addEventListener('click', openToDoPriority);
+   
+
+    
+    const todoInformationNotes = document.createElement('div');
+    todoInformationNotes.id = 'todoInformationNotes';
+    todoInformationContent.appendChild(todoInformationNotes);
+    
+    const todoInformationNotesName = document.createElement('h1');
+    todoInformationNotesName.id = 'todoInformationNotesName';
+    todoInformationNotesName.textContent = 'Notes';
+    todoInformationNotes.appendChild(todoInformationNotesName);
+
+    const todoInformationNotesText = document.createElement('p');
+    todoInformationNotesText.id = 'todoInformationNotesText';
+    todoInformationNotesText.textContent = task.notes;
+    todoInformationNotes.appendChild(todoInformationNotesText);
+
+    const todoInformationFooter = document.querySelector('#todoInformationFooter');
+
+
+}
+
+const openToDoPriority = () => {
+    const todoPrioritySelectorDiv = document.querySelector('#todoPrioritySelectorDiv');
+    console.log('change priority');
+
+    todoPrioritySelectorDiv.removeEventListener('click', openToDoPriority);
+    todoPrioritySelectorDiv.addEventListener('click', closeToDoPriority);
+    todoPrioritySelectorDiv.classList.add('selectingPriority');
+    todoPrioritySelectorDiv.innerHTML = 
+    `<div id='prioritySelectorMarks'>
+        <p id='priorityMark1' class='priorityMark'>!</p>
+        <p id='priorityMark2' class='priorityMark'>!</p>
+        <p id='priorityMark3' class='priorityMark'>!</p>
+    </div>
+    <div id='prioritySelectorChoices'>
+        <p id='priorityNone' class='priorityButton'>None</p>
+        <p id='priorityLow' class='priorityButton'>Low</p>
+        <p id='priorityMedium' class='priorityButton'>Medium</p>
+        <p id='priorityHigh' class='priorityButton'>High</p>
+
+    </div>`;
+}
+
+const closeToDoPriority = () => {
+    const todoPrioritySelectorDiv = document.querySelector('#todoPrioritySelectorDiv');
+    todoPrioritySelectorDiv.classList.remove('selectingPriority');
+    todoPrioritySelectorDiv.innerHTML = 
+    `<div id='prioritySelectorMarks'>
+        <p id='priorityMark1' class='priorityMark'>!</p>
+        <p id='priorityMark2' class='priorityMark'>!</p>
+        <p id='priorityMark3' class='priorityMark'>!</p>
+    </div>`;
+    todoPrioritySelectorDiv.addEventListener('click', openToDoPriority);
 }
 
 export { createIninitalPageStructure }
