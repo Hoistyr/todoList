@@ -45,6 +45,7 @@ const populateProjectSideList = () => {
     projectListAllToDos.textContent = `All ToDo's`;
     sideBarList.appendChild(projectListAllToDos);
     
+    
     const projectListTitle = document.createElement('h1');
     projectListTitle.id = 'projectsListTitle'
     projectListTitle.classList.add('projectListText', 'projectListTitle', 'sideBarList');
@@ -106,8 +107,6 @@ const showProjectList = () => {
     projectsListTitle.addEventListener('click', hideProjectList);
 }
 
-
-
 //Builds the side project list using the allProjects array in todoLogic.js
 const populateProjectList = () => {
     const projectList = document.querySelector('#projectList');
@@ -116,7 +115,7 @@ const populateProjectList = () => {
     toDo.allProjects.list.forEach((project) => {
         const sideBarProject = document.createElement('li');
         sideBarProject.classList.add('projectListItem');
-        sideBarProject.id = `${project.projectName}`
+        sideBarProject.id = `${project.projectID}`
         sideBarProject.textContent = `${project.projectName}`;
         projectList.appendChild(sideBarProject);
 
@@ -152,12 +151,9 @@ const openNewProjectCreator = () => {
     newProjectNameInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && (newProjectNameInput.value !== '' && newProjectNameInput.value !== 'Enter project name')) {
             addNewProject();
-        }
-        
-        
+        }  
     })
     newProjectButton.addEventListener('click', addNewProject);
-
 }
 
 //Creates and new project and adds it to the sidebar and toDoLogic allProjects list
@@ -205,13 +201,16 @@ const getNewProjectValue = () => {
 
 const viewProject = (projectClicked) => {
     const projectDiv = projectClicked.target;
-    console.log(projectDiv.id);
-    
-    
+    console.log(projectDiv.textContent);
+    const projectListAllToDos = document.getElementById('projectListAllToDos');
+    projectListAllToDos.addEventListener('click', viewAllTodos);
+
     resetViewingContent();
     changeViewingContent(projectDiv);
     updateToDoNavProjectName();
-    populateProjectToDoList(projectDiv.id);
+    updateToDoNavInputText(projectDiv.textContent);
+    populateProjectToDoList(projectDiv.textContent);
+    
 }
 
 const createTodoListStructure = () => {
@@ -255,14 +254,9 @@ const populateTodoListNav = () => {
     newTodoInput.defaultValue = 'Enter a new ToDo item'
     todoListNav.appendChild(newTodoInput);
 
-    newTodoInput.addEventListener('click', removeDefaultInput);
-    newTodoInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && (newTodoInput.value !== '' && newTodoInput.value !== 'Enter a new ToDo item')) {
-            getNewTodoInputValue();
-        }
+    newTodoInput.addEventListener('click', removeInputText);
+    newTodoInput.addEventListener('keyup', checkIfEnter);
         
-        
-    })
 
 }
 
@@ -273,6 +267,20 @@ const resetViewingContent = () => {
         currentSideBarSelection.classList.remove('viewingContent');
     }
     
+}
+
+//Resets the todo item input text to it's default
+const defaultNewTodoInput = () => {
+    const newTodoInput = document.getElementById('newTodoInput');
+    newTodoInput.defaultValue = 'Enter a new ToDo item';
+}
+
+
+const defaultTodoListProjectName = () => {
+    const todoListProjectName = document.getElementById('todoListProjectName');
+    const viewingContent = document.querySelector('.viewingContent');
+    todoListProjectName.textContent = viewingContent.textContent;
+
 }
 
 //Adds the viewingContent class to the clicked project
@@ -288,47 +296,140 @@ const updateToDoNavProjectName = () => {
 }
 
 //
-const updateToDoNavInput = () => {
+const updateToDoNavInputText = (projectName) => {
     const newTodoInput = document.getElementById('newTodoInput');
+    const currentSideBarSelection = document.querySelector('.viewingContent').textContent;
     
-    newTodoInput.defaultValue
+    newTodoInput.defaultValue = `Enter a new ToDo item in ${currentSideBarSelection}`;
 }
 
 //Removes the default text in the new task input
-const removeDefaultInput = () => {
+const removeInputText = () => {
     const newTodoInput = document.getElementById('newTodoInput');
-    let inputText = newTodoInput.value;
-    if (inputText === 'Enter a new ToDo item') {
-        console.log('clearing input');
-        newTodoInput.value = ''
-        newTodoInput.removeEventListener('click', removeDefaultInput);
-    }
+    console.log('clearing input');
+    newTodoInput.value = ''
+    newTodoInput.removeEventListener('click', removeInputText);
+    
+    const inputPageBackground = document.createElement('div');
+    inputPageBackground.id = 'inputPageBackground';
+    const content = document.querySelector('#content');
+    content.appendChild(inputPageBackground);
+
+    inputPageBackground.addEventListener('click', leaveInput);
+}
+
+const leaveInput = () => {
+    const inputPageBackground = document.querySelector('#inputPageBackground');
+    inputPageBackground.remove();
+    const newTodoInput = document.getElementById('newTodoInput');
+    if (newTodoInput.value === '') {
+        newTodoInput.value = 'Enter a new ToDo item';
+        newTodoInput.addEventListener('click', removeInputText);
+    } 
+
+    
 }
 
 //Collects the value of the new todo item
 const getNewTodoInputValue = () => {
-    console.log('made it');
     const newTodoInput = document.getElementById('newTodoInput');
     const toDoTitle = newTodoInput.value;
-    console.log(toDoTitle);
     newTodoInput.value = '';
+    
+    console.log(toDoTitle);
+    return toDoTitle;
 }
 
-//
+//Checks if the key pressed is enter
+const checkIfEnter = (e) => {
+    if (e.key === 'Enter' && (newTodoInput.value !== '')) {
+        const taskName = getNewTodoInputValue();
+        addNewToDo(taskName);
+    }
+}
+
+//Creates a new ToDo
+const addNewToDo = (taskName) => {
+    console.log('in addNewToDo');
+    
+    let currentProject = document.querySelector('.viewingContent').textContent;
+    
+    if (currentProject === `All ToDo's`) {
+        currentProject = 'Inbox';
+    }
+    console.log(currentProject);
+
+    toDo.allProjects.list.forEach((project) => {
+        
+        if (project.projectName === currentProject) {
+            console.log('in adding to projects');
+            const newTask = new toDo.item(taskName, '', project);
+            project.toDoList.push(newTask);
+            toDo.toDoList.addNew(newTask);
+            
+            console.log(toDo.allProjects);
+            console.log(toDo.allTodos);
+        }
+
+    })
+    
+    const todoListTodosHolder = document.querySelector('#todoListTodosHolder');
+    let projectType = document.querySelector('.viewingContent').classList;
+    console.log(projectType);
+    if (projectType.contains('projectListItem')) {
+        console.log('projectListItem');
+        removeAllChildNodes(todoListTodosHolder);
+        populateProjectToDoList(currentProject);
+    } else if (projectType.contains('sideBarList')) {
+        console.log('sideBarList');
+        removeAllChildNodes(todoListTodosHolder);
+        populateAllTodos();
+    }
+    console.log(toDo.allProjects.list);
+
+    
+}
+
+//Loads all the todos, sorted by project
 const viewAllTodos = () => {
-    const todoListTodosHolder = document.getElementById('todoListTodosHolder');
+    const projectListAllToDos = document.getElementById('projectListAllToDos');
+    
+    projectListAllToDos.removeEventListener('click', viewAllTodos);
+    resetViewingContent();
+    
+    projectListAllToDos.classList.add('viewingContent');
+    
+    defaultTodoListProjectName();
+    defaultNewTodoInput();
+
+    const todoListTodosHolder = document.querySelector('#todoListTodosHolder');
+    removeAllChildNodes(todoListTodosHolder);
+    populateAllTodos();
+     
+}
+
+//Builds the toDoList with all the todos
+const populateAllTodos = () => {
     toDo.allProjects.list.forEach((project) => {
         buildToDoList(project);
 
-        const toDoListProjectDiv = document.querySelector(`#${project.projectName}Div`)
-        const projectDivName = document.createElement('p');
-        projectDivName.textContent = `${project.projectName}`;
-        projectDivName.classList.add('projectDivName');
-        toDoListProjectDiv.appendChild(projectDivName);
-        toDoListProjectDiv.insertAdjacentElement('beforebegin', projectDivName);
-    })   
+        if (project.toDoList.length !== 0) {
+            const toDoListProjectDiv = document.querySelector(`#${project.projectName}ListDiv`);
+            toDoListProjectDiv.classList.add('projectToDoList');
+            console.log(toDoListProjectDiv);
+            
+            const projectDivName = document.createElement('p');
+            projectDivName.textContent = `${project.projectName}`;
+            projectDivName.classList.add('projectDivName');
+            toDoListProjectDiv.appendChild(projectDivName);
+            toDoListProjectDiv.insertAdjacentElement('afterbegin', projectDivName);
+
+            projectDivName.addEventListener('click', viewProject.bind());
+        }
+    })  
 }
 
+//Builds the todolist with the todos from the selected project
 const populateProjectToDoList = (projectName) => {
     const todoListTodosHolder = document.querySelector('#todoListTodosHolder');
     removeAllChildNodes(todoListTodosHolder);
@@ -337,11 +438,12 @@ const populateProjectToDoList = (projectName) => {
     projectArray.forEach((project) => buildToDoList(project)) 
 }
 
+//Creates the page elements of the todolist
 const buildToDoList = (project) => {
     console.log('in buildToDoList');
     const todoListTodosHolder = document.querySelector('#todoListTodosHolder');
     const toDoListProjectDiv = document.createElement('div');
-    toDoListProjectDiv.id = `${project.projectName}Div`;
+    toDoListProjectDiv.id = `${project.projectName}ListDiv`;
     todoListTodosHolder.appendChild(toDoListProjectDiv);
     
     const currentToDoList = document.createElement('div');
@@ -351,8 +453,9 @@ const buildToDoList = (project) => {
     project.toDoList.forEach((task) => buildTodoItem(task, project)); 
 }
 
+//Creates the todo elements
 const buildTodoItem = (task, project) => {
-    const currentToDoList = document.querySelector(`#${project.projectName}Div`);
+    const currentToDoList = document.querySelector(`#${project.projectName}ToDoList`);
     
     const currentTodo = document.createElement('div');
     currentTodo.classList.add('todo');
@@ -375,7 +478,6 @@ const buildTodoItem = (task, project) => {
     currentTodo.appendChild(removeX);
     currentToDoList.appendChild(currentTodo);
 } 
-
 
 
 const createTodoInformationStructure = () => {

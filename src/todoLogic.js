@@ -49,9 +49,7 @@ const buildInbox = (() => {
             inbox.toDoList.push(exampleToDo);
         }
         projectList.addNew(inbox);
-        
     }
-
     return {
         create,
     }
@@ -59,23 +57,35 @@ const buildInbox = (() => {
 
 //Module for functions which manipulate the project list
 const projectList = (() => {
-    
     const addNew = (newProject) => {
         console.log(allProjects.list);
-        const checkForName = allProjects.list.filter((project) => project.projectName === newProject.projectName);
+        const checkForProjectID = allProjects.list.filter((project) => project.projectID === newProject.projectID);
 
-        if (checkForName.length === 0){
+        if (checkForProjectID.length === 0){
             allProjects.list.push(newProject);
         }
         
         console.log(allProjects.list);
         console.log('-|-add new over-|-');
     }
-    
-
     return {
         addNew,
     }
+})();
+
+const toDoList = (() => {
+    const addNew = (newToDo) => {
+        const checkForToDoID = allTodos.list.filter((toDo) => toDo.todoID === newToDo.todoID);
+
+        if (checkForToDoID.length === 0) {
+            allTodos.list.push(newToDo);
+        }
+
+    }
+    return {
+        addNew,
+    }
+
 })();
 
 //Master list of all the projects
@@ -95,4 +105,4 @@ const allTodos = (() => {
 })();
 
 
-export {todoItem as item, todoProject as project, buildInbox, projectList, allProjects, allTodos}
+export {todoItem as item, todoProject as project, buildInbox, projectList, toDoList, allProjects, allTodos}
