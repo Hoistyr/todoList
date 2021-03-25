@@ -8,11 +8,12 @@ class todoProject {
 }
 
 class todoItem {
-    constructor (title, dueDate, project, priority) {
+    constructor (title, dueDate, project, projectID, priority) {
         this.title = title || 'No title';
         this.dueDate = dueDate || 'none';
         this.project = project || 'Inbox';
-        this.priority = priority || 'Low';
+        this.projectID = projectID || 'none';
+        this.priority = priority || 'None';
         this.todoID = 'tdID:' + makeID(16);
         this.notes = '';
         this.state = 'notDone';
@@ -45,12 +46,15 @@ const buildInbox = (() => {
         for (let i = 0; i < 3; i++) {
             const exampleToDo = new todoItem ('Example todo');
             exampleToDo.project = inbox;
-            exampleToDo.notes = 'Hello there. General Kenobi, ah what a pleasant surprise. *cough cough*'
+            exampleToDo.projectID = inbox.projectID;
+            exampleToDo.notes = 'Hello there. General Kenobi, ah what a pleasant surprise. *cough cough*';
+            exampleToDo.priority = 'Low';
             console.log(inbox.toDoList);
             inbox.toDoList.push(exampleToDo);
-            toDoList.addNew(exampleToDo);
+            
         }
         projectList.addNew(inbox);
+        toDoList.updateList();
     }
     return {
         create,
@@ -76,6 +80,19 @@ const projectList = (() => {
 })();
 
 const toDoList = (() => {
+    const updateList = () => {
+        allProjects.list.forEach(project => {
+            project.toDoList.forEach(toDo => {
+                const existCheck = allTodos.list.filter(currentToDo => currentToDo.todoID === toDo.todoID);
+                console.log('existCheck ' + existCheck);
+                if (existCheck.length === 0) {
+                    allTodos.list.push(toDo);
+                }
+            })
+        })
+    }
+    
+    //No longer in use
     const addNew = (newToDo) => {
         const checkForToDoID = allTodos.list.filter((toDo) => toDo.todoID === newToDo.todoID);
 
@@ -85,6 +102,7 @@ const toDoList = (() => {
 
     }
     return {
+        updateList,
         addNew,
     }
 

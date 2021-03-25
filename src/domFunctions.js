@@ -175,6 +175,7 @@ const refreshProjectList = () => {
 
 //Removes all the childNodes of an element
 const removeAllChildNodes = (parent) => {
+    console.log(parent);
     while(parent.firstChild) {
         parent.removeChild(parent.firstChild);
     }
@@ -363,28 +364,18 @@ const addNewToDo = (taskName) => {
         
         if (project.projectName === currentProject) {
             console.log('in adding to projects');
-            const newTask = new toDo.item(taskName, '', project);
+            const newTask = new toDo.item(taskName, '', project, project.projectID);
             project.toDoList.push(newTask);
-            toDo.toDoList.addNew(newTask);
+            toDo.toDoList.updateList();
             
             console.log(toDo.allProjects);
+            console.log('allTodos');
             console.log(toDo.allTodos);
         }
 
     })
     
-    const todoListTodosHolder = document.querySelector('#todoListTodosHolder');
-    let projectType = document.querySelector('.viewingContent').classList;
-    console.log(projectType);
-    if (projectType.contains('projectListItem')) {
-        console.log('projectListItem');
-        removeAllChildNodes(todoListTodosHolder);
-        populateProjectToDoList(currentProject);
-    } else if (projectType.contains('sideBarList')) {
-        console.log('sideBarList');
-        removeAllChildNodes(todoListTodosHolder);
-        populateAllTodos();
-    }
+    updateToDoList();
     console.log(toDo.allProjects.list);
 
     
@@ -455,6 +446,7 @@ const buildToDoList = (project) => {
 
 //Creates the todo elements
 const buildTodoItem = (task, project) => {
+    console.log('in buildTodoItem');
     const currentToDoList = document.querySelector(`#${project.projectName}ToDoList`);
     
     const currentTodo = document.createElement('div');
@@ -490,6 +482,21 @@ const buildTodoItem = (task, project) => {
     todoMain.addEventListener('click', populateToDoInformation);
 } 
 
+const updateToDoList = () => {
+    console.log('in updateToDoList');
+    const todoListTodosHolder = document.querySelector('#todoListTodosHolder');
+    let projectType = document.querySelector('.viewingContent').classList;
+    if (projectType.contains('projectListItem')) {
+        console.log('projectListItem');
+        removeAllChildNodes(todoListTodosHolder);
+        populateProjectToDoList(currentProject);
+    } else if (projectType.contains('sideBarList')) {
+        console.log('sideBarList');
+        removeAllChildNodes(todoListTodosHolder);
+        populateAllTodos();
+    }
+
+}
 
 const deleteToDoItem = (event) => {
     console.log(event);
@@ -512,38 +519,42 @@ const createTodoInformationStructure = () => {
     
 }
 
-const getToDo = (event) => {
-    let toDoItem = '';
-    let clickedToDoId = event.target.parentNode.dataset.todoid;
-    if (clickedToDoId === undefined) {
-        clickedToDoId = (event.target.parentNode).parentNode.dataset.todoid;
-    }
-    
-    console.log('id next');
-    console.log(clickedToDoId);
-    
-    const setToDo = (task) => {
-        toDoItem = task;
-    }
-    
-    toDo.allTodos.list.forEach(task => {
-        if (task.todoID === clickedToDoId) {
-            setToDo(task);
-        }
-    });
-
-   if (toDoItem !== '') {
-       return toDoItem;
-   }
-}
-
 const populateToDoInformation = (event) => {
+    let toDoDiv = '';
+    console.log('checking for .viewingInformation');
+    
+    if (document.querySelector('.cacheView')) {
+        console.log('in cacheView');
+        toDoDiv = document.querySelector('.cacheView');
+        toDoDiv.classList.remove('cacheView');
+        toDoDiv.classList.add('viewingInformation');
+    } else if (document.querySelector('.viewingInformation')) {
+        console.log('hasviewinginfo');
+        const viewingToDo = document.querySelector('.viewingInformation');
+        viewingToDo.classList.remove('viewingInformation');
+        toDoDiv = event.target.parentNode;
+    } else {
+        toDoDiv = event.target.parentNode;
+    }
+    console.log('toDoDiv');
+    console.log(toDoDiv);
+    
+    const todoInformationHeader = document.getElementById('todoInformationHeader');
+    const todoInformationContent = document.getElementById('todoInformationContent');
+    const todoInformationFooter = document.getElementById('todoInformationFooter');
+    
+    removeAllChildNodes(todoInformationHeader);
+    removeAllChildNodes(todoInformationContent);
+    removeAllChildNodes(todoInformationFooter);
+    
     console.log('made it');
-    let task = getToDo(event);
-    console.log(task);
-    const todoInformationHeader = document.querySelector('#todoInformationHeader');
-    const todoMain = event.target;
-    todoMain.removeEventListener('click', populateToDoInformation);
+    
+    if (toDoDiv.classList.contains('todoMain')) {
+        toDoDiv = toDoDiv.parentNode;
+    }
+    toDoDiv.classList.add('viewingInformation');
+    const toDoID = toDoDiv.dataset.todoid;
+    const task = getToDo(toDoID);
     
     const todoInformationTitle = document.createElement('input');
     todoInformationTitle.id = 'todoInformationTitle';
@@ -551,7 +562,6 @@ const populateToDoInformation = (event) => {
     todoInformationTitle.defaultValue = task.title;
     todoInformationHeader.appendChild(todoInformationTitle);
 
-    const todoInformationContent = document.querySelector('#todoInformationContent');
     const todoPrioritySelectorDiv = document.createElement('div');
     todoPrioritySelectorDiv.id = 'todoPrioritySelectorDiv';
     todoInformationContent.appendChild(todoPrioritySelectorDiv);
@@ -561,10 +571,9 @@ const populateToDoInformation = (event) => {
         <p id='priorityMark2' class='priorityMark'>!</p>
         <p id='priorityMark3' class='priorityMark'>!</p>
     </div>`;
+    todoPrioritySelectorDiv.classList.add(`currentPriority${task.priority}`);
     todoPrioritySelectorDiv.addEventListener('click', openToDoPriority);
    
-
-    
     const todoInformationNotes = document.createElement('div');
     todoInformationNotes.id = 'todoInformationNotes';
     todoInformationContent.appendChild(todoInformationNotes);
@@ -576,12 +585,19 @@ const populateToDoInformation = (event) => {
 
     const todoInformationNotesText = document.createElement('p');
     todoInformationNotesText.id = 'todoInformationNotesText';
-    todoInformationNotesText.textContent = task.notes;
+    if (task.notes === '') {
+        todoInformationNotesText.textContent = 'No notes yet, add some by clicking here';
+    } else {
+        todoInformationNotesText.textContent = task.notes;
+    }
+    
     todoInformationNotes.appendChild(todoInformationNotesText);
+    todoInformationNotesText.addEventListener('click', openToDoNoteEditor);
 
-    const todoInformationFooter = document.querySelector('#todoInformationFooter');
-
-
+    
+    const changeProjectDiv = document.createElement('div');
+    changeProjectDiv.id = 'changeProjectDiv';
+    todoInformationFooter.appendChild(changeProjectDiv);
 }
 
 const openToDoPriority = () => {
@@ -604,6 +620,11 @@ const openToDoPriority = () => {
         <p id='priorityHigh' class='priorityButton'>High</p>
 
     </div>`;
+
+    const priorityButtons = document.querySelectorAll('.priorityButton');
+    priorityButtons.forEach(button => {
+    button.addEventListener('click', changeTaskPriority);
+    })
 }
 
 const closeToDoPriority = () => {
@@ -616,6 +637,68 @@ const closeToDoPriority = () => {
         <p id='priorityMark3' class='priorityMark'>!</p>
     </div>`;
     todoPrioritySelectorDiv.addEventListener('click', openToDoPriority);
+}
+
+const changeTaskPriority = (event) => {
+    const newPriority = event.target.textContent;
+    console.log(newPriority);
+    
+    const toDoDiv = document.querySelector('.viewingInformation');
+    const toDoID = document.querySelector('.viewingInformation').dataset.todoid;
+    console.log('changeTask ID next');
+    console.log(toDoID);
+    let task = getToDo(toDoID);
+    task.priority = newPriority;
+    console.log(task);
+    console.log(toDo.allProjects.list);
+    toDo.allTodos.list.forEach(task => {
+        console.log(task.priority);
+    })
+    
+    updateToDoList();
+    console.log('afterUpdate');
+    const reapplyToDoDiv = document.querySelector(`[data-todoid = '${toDoID}']`);
+    console.log('newDoDiv');
+    
+    reapplyToDoDiv.classList.add('cacheView');
+    reapplyToDoDiv.classList.remove('viewingInformation');
+    console.log(reapplyToDoDiv);
+    populateToDoInformation();
+    
+
+}
+
+const getToDo = (toDoID) => {
+    let toDoItem = '';
+    const setToDo = (task) => {
+        toDoItem = task;
+    }
+    
+    toDo.allTodos.list.forEach(task => {
+        if (task.todoID === toDoID) {
+            setToDo(task);
+        }
+    });
+
+   if (toDoItem !== '') {
+       return toDoItem;
+   }
+}
+
+const openToDoNoteEditor = () => {
+    const todoInformationNotes = document.getElementById('todoInformationNotes');
+    const todoInformationNotesText = document.getElementById('todoInformationNotesText');
+    const oldNoteText = todoInformationNotesText.textContent;
+    todoInformationNotesText.remove();
+
+    const todoInformationNotesInput = document.createElement('textarea');
+    todoInformationNotesInput.id = 'todoInformationNotesInput';
+    todoInformationNotesInput.type = 'text';
+    todoInformationNotesInput.value = oldNoteText;
+    todoInformationNotes.appendChild(todoInformationNotesInput);
+
+
+
 }
 
 export { createIninitalPageStructure }
