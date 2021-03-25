@@ -1,5 +1,6 @@
 import {format} from 'date-fns';
 import * as toDo from './todoLogic.js'
+import flatpickr from 'flatpickr';
 
 const createIninitalPageStructure = () => {
     const content = document.querySelector('#content');
@@ -311,17 +312,13 @@ const removeInputText = () => {
     newTodoInput.value = ''
     newTodoInput.removeEventListener('click', removeInputText);
     
-    const inputPageBackground = document.createElement('div');
-    inputPageBackground.id = 'inputPageBackground';
-    const content = document.querySelector('#content');
-    content.appendChild(inputPageBackground);
-
+    addBackgroundDiv();
     inputPageBackground.addEventListener('click', leaveInput);
 }
 
 const leaveInput = () => {
-    const inputPageBackground = document.querySelector('#inputPageBackground');
-    inputPageBackground.remove();
+    
+    removeBackgroundDiv();
     const newTodoInput = document.getElementById('newTodoInput');
     if (newTodoInput.value === '') {
         newTodoInput.value = 'Enter a new ToDo item';
@@ -329,6 +326,18 @@ const leaveInput = () => {
     } 
 
     
+}
+
+const addBackgroundDiv = () => {
+    const inputPageBackground = document.createElement('div');
+    inputPageBackground.id = 'inputPageBackground';
+    const content = document.querySelector('#content');
+    content.appendChild(inputPageBackground);
+
+}
+const removeBackgroundDiv = () => {
+    const inputPageBackground = document.querySelector('#inputPageBackground');
+    inputPageBackground.remove();
 }
 
 //Collects the value of the new todo item
@@ -528,11 +537,17 @@ const populateToDoInformation = (event) => {
         toDoDiv = document.querySelector('.cacheView');
         toDoDiv.classList.remove('cacheView');
         toDoDiv.classList.add('viewingInformation');
+    } else if (document.querySelector('.viewingInformation') && event === undefined) {
+        console.log('no event');
+        const viewingToDo = document.querySelector('.viewingInformation');
+        toDoDiv = viewingToDo;
     } else if (document.querySelector('.viewingInformation')) {
         console.log('hasviewinginfo');
         const viewingToDo = document.querySelector('.viewingInformation');
         viewingToDo.classList.remove('viewingInformation');
+        console.log(toDoDiv);
         toDoDiv = event.target.parentNode;
+        
     } else {
         toDoDiv = event.target.parentNode;
     }
@@ -561,10 +576,16 @@ const populateToDoInformation = (event) => {
     todoInformationTitle.type = 'text';
     todoInformationTitle.defaultValue = task.title;
     todoInformationHeader.appendChild(todoInformationTitle);
+    todoInformationTitle.addEventListener('click', openTitleEditor);
+    
+
+    const todoInformationDetails = document.createElement('div');
+    todoInformationDetails.id = 'todoInformationDetails';
+    todoInformationContent.appendChild(todoInformationDetails);
 
     const todoPrioritySelectorDiv = document.createElement('div');
     todoPrioritySelectorDiv.id = 'todoPrioritySelectorDiv';
-    todoInformationContent.appendChild(todoPrioritySelectorDiv);
+    todoInformationDetails.appendChild(todoPrioritySelectorDiv);
     todoPrioritySelectorDiv.innerHTML = 
     `<div id='prioritySelectorMarks'>
         <p id='priorityMark1' class='priorityMark'>!</p>
@@ -573,6 +594,16 @@ const populateToDoInformation = (event) => {
     </div>`;
     todoPrioritySelectorDiv.classList.add(`currentPriority${task.priority}`);
     todoPrioritySelectorDiv.addEventListener('click', openToDoPriority);
+
+    const todoDueDateSelectionDiv = document.createElement('div');
+    todoDueDateSelectionDiv.id ='todoDueDateSelectionDiv';
+
+    todoInformationDetails.appendChild(todoDueDateSelectionDiv);
+    const todoInformationCalIcon = document.createElement('img');
+    todoInformationCalIcon.id ='todoInformationCalIcon';
+    todoInformationCalIcon.src ='../src/images/icons/calIcon.svg'
+    todoDueDateSelectionDiv.appendChild(todoInformationCalIcon)
+
    
     const todoInformationNotes = document.createElement('div');
     todoInformationNotes.id = 'todoInformationNotes';
@@ -583,21 +614,39 @@ const populateToDoInformation = (event) => {
     todoInformationNotesName.textContent = 'Notes';
     todoInformationNotes.appendChild(todoInformationNotesName);
 
-    const todoInformationNotesText = document.createElement('p');
-    todoInformationNotesText.id = 'todoInformationNotesText';
+    const todoInformationNotesInput = document.createElement('TEXTAREA');
+    todoInformationNotesInput.id = 'todoInformationNotesInput';
+    
+    
+    
     if (task.notes === '') {
-        todoInformationNotesText.textContent = 'No notes yet, add some by clicking here';
+        const todoInformationNotesText = document.createTextNode('No notes yet, add some by clicking here');
+        todoInformationNotesInput.appendChild(todoInformationNotesText);
     } else {
-        todoInformationNotesText.textContent = task.notes;
+        const todoInformationNotesText = document.createTextNode(task.notes);
+        todoInformationNotesInput.appendChild(todoInformationNotesText);
     }
     
-    todoInformationNotes.appendChild(todoInformationNotesText);
-    todoInformationNotesText.addEventListener('click', openToDoNoteEditor);
+    todoInformationNotes.appendChild(todoInformationNotesInput);
+    todoInformationNotesInput.addEventListener('click', openToDoNoteEditor);
 
     
     const changeProjectDiv = document.createElement('div');
     changeProjectDiv.id = 'changeProjectDiv';
+    console.log(task);
+    const currentProjectChangeName = document.createElement('p');
+    currentProjectChangeName.id = 'currentProjectChangeName';
+    currentProjectChangeName.classList.add('changeProjectItem');
+    currentProjectChangeName.textContent = task.project.projectName;
+    changeProjectDiv.appendChild(currentProjectChangeName);
     todoInformationFooter.appendChild(changeProjectDiv);
+    
+    console.log('lengths check');
+    const allProjectsLengthCheck = toDo.allProjects.list.filter((checkProject) => checkProject.projectName !== task.project.projectName);
+    
+    if (allProjectsLengthCheck.length !== 0) {
+        changeProjectDiv.addEventListener('click', openProjectSelector);
+    }
 }
 
 const openToDoPriority = () => {
@@ -658,8 +707,6 @@ const changeTaskPriority = (event) => {
     updateToDoList();
     console.log('afterUpdate');
     const reapplyToDoDiv = document.querySelector(`[data-todoid = '${toDoID}']`);
-    console.log('newDoDiv');
-    
     reapplyToDoDiv.classList.add('cacheView');
     reapplyToDoDiv.classList.remove('viewingInformation');
     console.log(reapplyToDoDiv);
@@ -685,20 +732,197 @@ const getToDo = (toDoID) => {
    }
 }
 
+const getProject = (projectID) => {
+    let returnProject = '';
+    const setProject = (project) => {
+        returnProject = project;
+    }
+    
+    toDo.allProjects.list.forEach(project => {
+        if (project.projectID === projectID) {
+            setProject(project);
+        }
+    });
+
+   if (returnProject !== '') {
+       return returnProject;
+   }
+}
+
+const checkIfEnterTitle = (e) => {
+    if (e.key === 'Enter') {
+        updateToDoTitle();
+    }
+}
+
+
+
+const openTitleEditor = () => {
+    console.log('in title editor');
+    const todoInformationTitle = document.getElementById('todoInformationTitle');
+    todoInformationTitle.removeEventListener('click', openTitleEditor);
+    todoInformationTitle.classList.add('editingTitle');
+    todoInformationTitle.select();
+    addBackgroundDiv();
+    const inputPageBackground = document.querySelector('#inputPageBackground');
+    inputPageBackground.addEventListener('click', updateToDoTitle);
+    todoInformationTitle.addEventListener('keypress', checkIfEnterTitle);
+}
+
+const updateToDoTitle = () => {
+    const todoInformationTitle = document.getElementById('todoInformationTitle');
+    todoInformationTitle.classList.remove('editingNote');
+    removeBackgroundDiv();
+    todoInformationTitle.addEventListener('click', openTitleEditor);
+
+    const updatedTitle = todoInformationTitle.value;
+    console.log(updatedTitle);
+
+    const toDoID = document.querySelector('.viewingInformation').dataset.todoid;
+    const currentToDo = getToDo(toDoID);
+    currentToDo.title = updatedTitle;
+    updateToDoList();
+    console.log('afterUpdate');
+    const reapplyToDoDiv = document.querySelector(`[data-todoid = '${toDoID}']`);
+    reapplyToDoDiv.classList.add('cacheView');
+    reapplyToDoDiv.classList.remove('viewingInformation');
+    console.log(reapplyToDoDiv);
+    populateToDoInformation();
+    console.log(toDo.allProjects.list);
+    console.log(toDo.allTodos.list);
+}
+
 const openToDoNoteEditor = () => {
-    const todoInformationNotes = document.getElementById('todoInformationNotes');
-    const todoInformationNotesText = document.getElementById('todoInformationNotesText');
-    const oldNoteText = todoInformationNotesText.textContent;
-    todoInformationNotesText.remove();
-
-    const todoInformationNotesInput = document.createElement('textarea');
-    todoInformationNotesInput.id = 'todoInformationNotesInput';
-    todoInformationNotesInput.type = 'text';
-    todoInformationNotesInput.value = oldNoteText;
-    todoInformationNotes.appendChild(todoInformationNotesInput);
+    console.log('in note editor');
+    const todoInformationNotesInput = document.getElementById('todoInformationNotesInput');
+    todoInformationNotesInput.removeEventListener('click', openToDoNoteEditor);
+    todoInformationNotesInput.classList.add('editingNote');
+    if (todoInformationNotesInput.value === 'No notes yet, add some by clicking here') {
+        todoInformationNotesInput.value = '';
+    }
 
 
+    addBackgroundDiv();
+    const inputPageBackground = document.querySelector('#inputPageBackground');
+    inputPageBackground.addEventListener('click', updateToDoNotes);
 
+
+}
+
+const updateToDoNotes = () => {
+    const todoInformationNotesInput = document.getElementById('todoInformationNotesInput');
+    todoInformationNotesInput.classList.remove('editingNote');
+    removeBackgroundDiv();
+    todoInformationNotesInput.addEventListener('click', openToDoNoteEditor);
+
+    const updatedNote = todoInformationNotesInput.value;
+    console.log(updatedNote);
+
+    const toDoID = document.querySelector('.viewingInformation').dataset.todoid;
+    const currentToDo = getToDo(toDoID);
+    currentToDo.notes = updatedNote;
+    populateToDoInformation();
+    console.log(toDo.allProjects.list);
+    console.log(toDo.allTodos.list);
+}
+
+const openProjectSelector = () => {
+    console.log('in project selector');
+    const todoInformationFooter = document.getElementById('todoInformationFooter');
+    const changeProjectDiv = document.getElementById('changeProjectDiv');
+    changeProjectDiv.removeEventListener('click', openProjectSelector);
+    changeProjectDiv.classList.add('changingProject');
+    todoInformationFooter.classList.add('changingProject');
+    addBackgroundDiv();
+    const inputPageBackground = document.getElementById('inputPageBackground');
+    
+    //changeProjectDiv.addEventListener('click', closeProjectSelector);
+    inputPageBackground.addEventListener('click', closeProjectSelector);
+    
+    let currentProjectChangeName = document.getElementById('currentProjectChangeName');
+    currentProjectChangeName.remove();
+    
+    const toDoID = document.querySelector('.viewingInformation').dataset.todoid;
+    const currentToDo = getToDo(toDoID);
+    const currentProject = currentToDo.project.projectName;
+    
+
+    toDo.allProjects.list.forEach(listProject => {
+        const projectName = listProject.projectName;
+        console.log(projectName);
+        if (projectName !== currentProject) {
+            const projectChoice = document.createElement('p');
+            projectChoice.textContent = projectName;
+            projectChoice.id = `projectChoice${projectName}`
+            projectChoice.classList.add('changeProjectItem', 'nonSelectedChangeProject');
+            projectChoice.dataset.projectid = `${listProject.projectID}`
+            changeProjectDiv.appendChild(projectChoice);
+
+            projectChoice.addEventListener('click', updateProject);
+        }
+    })
+    
+    currentProjectChangeName = document.createElement('p');
+    currentProjectChangeName.id = 'currentProjectChangeName';
+    currentProjectChangeName.classList.add('changeProjectItem');
+    currentProjectChangeName.textContent = currentProject;
+    changeProjectDiv.appendChild(currentProjectChangeName);
+    
+}
+
+const closeProjectSelector = () => {
+    removeBackgroundDiv();
+    console.log('closing projectSelector');
+    const todoInformationFooter = document.getElementById('todoInformationFooter');
+    const changeProjectDiv = document.getElementById('changeProjectDiv');
+    changeProjectDiv.removeEventListener('click', closeProjectSelector);
+    changeProjectDiv.classList.remove('changingProject');
+    todoInformationFooter.classList.remove('changingProject');
+    removeAllChildNodes(changeProjectDiv);
+
+    console.log('getting ID');
+    const toDoID = document.querySelector('.viewingInformation').dataset.todoid;
+    const currentToDo = getToDo(toDoID);
+    
+    let currentProjectChangeName = document.createElement('p');
+    currentProjectChangeName.id = 'currentProjectChangeName';
+    currentProjectChangeName.classList.add('changeProjectItem');
+    currentProjectChangeName.textContent = currentToDo.project.projectName;
+    changeProjectDiv.appendChild(currentProjectChangeName);
+    changeProjectDiv.addEventListener('click', openProjectSelector);
+}
+
+const updateProject = (event) => {
+    removeBackgroundDiv();
+    console.log('in update project');
+    console.log(event.target.dataset.projectid);
+    const newProject = getProject(event.target.dataset.projectid);
+    const toDoID = document.querySelector('.viewingInformation').dataset.todoid;
+    const currentToDo = getToDo(toDoID);
+    const currentProject = currentToDo.project;
+
+    currentProject.toDoList.forEach((toDoItem, index, list) => {
+       
+        if (toDoItem === currentToDo) {
+            console.log(toDoItem);
+            console.log(index);
+            list.splice(index, 1);
+        }
+    })
+    console.log(currentProject);
+    currentToDo.project = newProject;
+    currentToDo.projectID = newProject.projectID;
+    newProject.toDoList.push(currentToDo);
+    console.log(toDo.allProjects.list);
+    toDo.toDoList.updateList();
+    console.log(toDo.allTodos.list);
+    updateToDoList();
+    console.log('afterUpdate');
+    const reapplyToDoDiv = document.querySelector(`[data-todoid = '${toDoID}']`);
+    reapplyToDoDiv.classList.add('cacheView');
+    reapplyToDoDiv.classList.remove('viewingInformation');
+    console.log(reapplyToDoDiv);
+    populateToDoInformation();
 }
 
 export { createIninitalPageStructure }

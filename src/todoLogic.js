@@ -18,10 +18,6 @@ class todoItem {
         this.notes = '';
         this.state = 'notDone';
     }
-
-    makeNotes(noteText) {
-        this.notes = noteText;
-    }
 }
 
 const makeID = (length) => {

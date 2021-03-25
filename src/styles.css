@@ -271,7 +271,6 @@ h1.projectListTitle:hover {
     padding: 0px;
     font-family: 'Nunito', sans-serif;
     height: 100%;
-    width: fit-content;
 }
 
 .todoDueDate {
@@ -341,6 +340,16 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
     outline: none;
 }
 
+#todoInformationTitle::selection {
+    color: #202932;
+    background: #cbd2d9;
+  }
+
+#todoInformationTitle.editingNote {
+    position: relative;
+    z-index: 99;
+}
+
 #todoInformationContent {
     height: 70%;
     display: flex;
@@ -348,6 +357,10 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
     width: 100%;
     justify-content: center;
     align-items: center;
+}
+
+#todoInformationDetails {
+    display: flex;
 }
 
 #todoPrioritySelectorDiv {
@@ -423,6 +436,13 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
     text-align: center;
     height: 20px;
     border-radius: 25px;
+    border: solid 2px transparent;
+    box-sizing: border-box;
+    padding: 15px;
+}
+
+.priorityButton:hover {
+    border: solid 2px #cbd2d9;
 }
 
 #priorityNone {
@@ -442,7 +462,20 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
 #priorityHigh {
     background-color: #1FDECC;
     color: #202932;
-    height:fit-content;
+}
+
+#todoDueDateSelectionDiv {
+    display: flex;
+    background-color: #202932;
+    margin-top: 10px;
+    margin-left: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 20px;
+    border-radius: 25px;
+    justify-content: center;
+    align-items: center;
+    border: solid 1px transparent;
 }
 
 #todoInformationNotes {
@@ -461,6 +494,7 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
     margin: 0px;
     margin-top: 10px;
     width: 100%;
+    border: solid 1px transparent;
 }
 
 #todoInformationNotesText:hover {
@@ -470,22 +504,95 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
 #todoInformationNotesInput {
     color: inherit;
     font-size: 1rem;
-    background-color: transparent;
-    border: solid transparent;
+    font-family: inherit;
+    border: solid 1px transparent;
     margin: 0px;
+    padding: 0px;
     margin-top: 10px;
     width: 100%;
-    height: auto;
-    text-overflow: clip;
+    height: 80%;
+    background-color: #1d2025;
+    box-shadow: none;
+    resize: none;
+    outline: none;
+    
 }
 
-#todoInformationNotesInput:focus {
-    outline: none; 
+#todoInformationNotesInput.editingNote {
+    position: relative;
+    z-index: 99;
 }
 
 #todoInformationFooter {
     background-color: #202932;
     height: 15%;
+    display: flex;
+    position: relative;
+}
+
+#changeProjectDiv {
+    position: absolute;
+    font-family: inherit;
+    color:#202932;
+    background-color: #ecc197;
+    border-radius: 25px;
+    height: 40px;
+    width: 150px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: auto;
+    left: 0; bottom: 20px; right: 0;
+    box-sizing: border-box;
+}
+
+#changeProjectDiv:hover {
+    cursor: pointer;
+    
+}
+
+#todoInformationFooter.changingProject {
+    position: relative;
+}
+
+#changeProjectDiv.changingProject {
+    z-index: 99;
+    height: auto;
+}
+
+.changeProjectItem {
+    margin: 0px;
+    padding: 0px;
+    font-size: 1rem;
+    border: solid 2px transparent;
+    margin-top: 10px;
+    width: auto;
+    position: relative;
+    z-index: 100;
+}
+
+#currentProjectChangeName {
+    position: relative;
+    margin: auto;
+    left: 0; bottom: 0; right: 0; top: 0;
+    width: auto;
+}
+
+.nonSelectedChangeProject {
+    border-radius: 25px;
+    background-color: #515a61;
+    max-width: 90%;
+    width: auto;
+    position: relative;
+    margin: auto;
+    margin-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.nonSelectedChangeProject:hover {
+    border: solid 2px #cbd2d9;
 }
 
 
