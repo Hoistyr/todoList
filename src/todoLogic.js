@@ -77,10 +77,10 @@ const projectList = (() => {
 
 const toDoList = (() => {
     const updateList = () => {
+        allTodos.list = [];
         allProjects.list.forEach(project => {
             project.toDoList.forEach(toDo => {
                 const existCheck = allTodos.list.filter(currentToDo => currentToDo.todoID === toDo.todoID);
-                console.log('existCheck ' + existCheck);
                 if (existCheck.length === 0) {
                     allTodos.list.push(toDo);
                 }

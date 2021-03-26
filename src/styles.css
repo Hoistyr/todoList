@@ -224,6 +224,10 @@ h1.projectListTitle:hover {
     height: 100%;
 }
 
+.projectDoneList {
+    margin-top: 20px;
+}
+
 .projectToDoList {
     margin-bottom: 20px;
 }
@@ -259,6 +263,10 @@ h1.projectListTitle:hover {
     transition: 0.75s;
 }
 
+.todoCheckBox {
+    margin-left: 10px;
+}
+
 .todoMain {
     width: 100%;
     height: 100%;
@@ -271,6 +279,12 @@ h1.projectListTitle:hover {
     padding: 0px;
     font-family: 'Nunito', sans-serif;
     height: 100%;
+    margin-left: 10px;
+}
+
+.todoDoneText {
+    color: #cbd2d973;
+    text-decoration: line-through;
 }
 
 .todoDueDate {
@@ -285,7 +299,7 @@ h1.projectListTitle:hover {
 }
 
 .projectDivName {
-    color:#cbd2d9cb;
+    color:#cbd2d9;
     margin: 0px;
     padding: 0px;
     border-bottom: solid 1.5px #cbd2d93a; 
@@ -314,6 +328,7 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
     border-left: solid .0025rem #1f2933;
     color: #cbd2d9;
     box-sizing: border-box;
+    overflow-x:hidden;
 }
 
 #todoInformationHeader {
@@ -361,6 +376,17 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
 
 #todoInformationDetails {
     display: flex;
+    position: relative;
+    width:100%;
+    height:auto;
+    justify-content: center;
+}
+
+.toDoDetailSelector.hideToDoDetailSelector {
+    position: absolute;
+    transform: translate(999px, 0px);
+    width: 0;
+    height: 0%;
 }
 
 #todoPrioritySelectorDiv {
@@ -402,7 +428,6 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
     justify-content: flex-start;
     margin: 10px;
     padding: 10px;
-    transition: 1s;
 }
 
 
@@ -478,6 +503,54 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
     border: solid 1px transparent;
 }
 
+#todoDueDateSelectionDiv:hover {
+    cursor: pointer;
+}
+
+#todoDueDateSelectionDiv.selectingDate {
+    width: auto;
+    height: auto;
+    padding-bottom: 15px;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin: 10px;
+    padding: 10px;
+    position: relative;
+    z-index: 99;
+}
+
+#todoInformationCalIcon {
+    position: relative;
+    z-index: 100;
+}
+#dueDateInput {
+    background-color: transparent;
+    color: #cbd2d9;
+    border: solid 1px transparent;
+    font: inherit;
+    width: auto;
+    margin-left: 20px;
+    margin-top: 20px;
+}
+
+#dueDateInput:focus {
+    border: transparent;
+    outline: none;
+}
+
+::selection {
+    color: #202932;
+    background-color: #cbd2d9;
+}
+
+#submitDueDateButton {
+    margin-top:10px;
+    background-color: #ecc197;
+    border-radius: 25px;
+    color:#202932;
+    padding: 8px;
+}
+
 #todoInformationNotes {
     display: flex;
     flex-direction: column;
@@ -488,6 +561,9 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
 
 #todoInformationNotesName {
     margin: 0px;
+}
+#todoInformationNotesName:hover {
+    cursor: default;
 }
 
 #todoInformationNotesText {
@@ -521,6 +597,18 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
 #todoInformationNotesInput.editingNote {
     position: relative;
     z-index: 99;
+}
+
+#todoInformationDueDateDiv {
+    height:auto;
+    width:auto;
+    margin-top: 10px;
+}
+
+#todoInformationDueDate {
+    margin: 0px;
+    padding: 0px;
+    
 }
 
 #todoInformationFooter {

@@ -42,7 +42,7 @@ const populateProjectSideList = () => {
     
     const projectListAllToDos = document.createElement('h1');
     projectListAllToDos.id = 'projectListAllToDos';
-    projectListAllToDos.classList.add('projectListText', 'projectListTitle', 'sideBarList', 'viewingContent');
+    projectListAllToDos.classList.add('projectListText', 'projectListTitle', 'sideBarList');
     projectListAllToDos.textContent = `All ToDo's`;
     sideBarList.appendChild(projectListAllToDos);
     
@@ -111,17 +111,34 @@ const showProjectList = () => {
 //Builds the side project list using the allProjects array in todoLogic.js
 const populateProjectList = () => {
     const projectList = document.querySelector('#projectList');
-    
+    let cachedProjectID = '';
+    if (document.querySelector('.viewingContent')) {
+        cachedProjectID = document.querySelector('.viewingContent').id;
+    }
+    removeAllChildNodes(projectList);
+    if (cachedProjectID === '') {
+        const projectListAllToDos = document.getElementById('projectListAllToDos');
+        projectListAllToDos.classList.add('viewingContent');
+    }
+
     //Gets the list of allProjects from todoLogic and creates the sidebar list from that
     toDo.allProjects.list.forEach((project) => {
         const sideBarProject = document.createElement('li');
         sideBarProject.classList.add('projectListItem');
-        sideBarProject.id = `${project.projectID}`
+        sideBarProject.id = `${project.projectID}`;
+        
         sideBarProject.textContent = `${project.projectName}`;
         projectList.appendChild(sideBarProject);
-
-        sideBarProject.addEventListener('click', viewProject.bind());
+        sideBarProject.addEventListener('click', viewProject);
     })
+
+    console.log('pre cachetoview');
+    console.log(cachedProjectID);
+    if (cachedProjectID !== '' && cachedProjectID !== 'projectListAllToDos') {
+        const viewedProject = document.getElementById(`${cachedProjectID}`);
+        console.log(viewedProject);
+        viewProject(viewedProject);
+    }
 
     const newProjectButtonHolder = document.createElement('li');
     newProjectButtonHolder.id = 'newProjectButtonHolder';
@@ -164,19 +181,12 @@ const addNewProject = () => {
     let newProject = new toDo.project(projectName);
     console.log(newProject);
     toDo.projectList.addNew(newProject);
-    refreshProjectList();
-    populateProjectList(); 
-}
-
-//Removes all the list items in projectList
-const refreshProjectList = () => {
-    const projectList = document.getElementById('projectList');
-    removeAllChildNodes(projectList);
+    
+    populateProjectList();
 }
 
 //Removes all the childNodes of an element
 const removeAllChildNodes = (parent) => {
-    console.log(parent);
     while(parent.firstChild) {
         parent.removeChild(parent.firstChild);
     }
@@ -202,7 +212,25 @@ const getNewProjectValue = () => {
 }
 
 const viewProject = (projectClicked) => {
-    const projectDiv = projectClicked.target;
+    console.log('in viewProject');
+    console.log(projectClicked);
+    console.log(projectClicked.id);
+    //console.log(projectClicked.target.dataset.projectid);
+    let projectDiv = '';
+    if (projectClicked.id === undefined) {
+        if (projectClicked.target !== undefined && projectClicked.target.dataset.projectid !== undefined) {
+            console.log('has target');
+            console.log(projectClicked.target.dataset);
+            let projectID = projectClicked.target.dataset.projectid;
+            projectDiv = document.getElementById(`${projectID}`);
+            console.log(projectDiv);
+        } else {
+            projectDiv = projectClicked.target;
+        }
+    } else {    
+        projectDiv = projectClicked;
+    }
+    
     console.log(projectDiv.textContent);
     const projectListAllToDos = document.getElementById('projectListAllToDos');
     projectListAllToDos.addEventListener('click', viewAllTodos);
@@ -313,13 +341,15 @@ const removeInputText = () => {
     newTodoInput.removeEventListener('click', removeInputText);
     
     addBackgroundDiv();
-    inputPageBackground.addEventListener('click', leaveInput);
+    inputPageBackground.addEventListener('mouseenter', leaveInput);
 }
 
 const leaveInput = () => {
     
     removeBackgroundDiv();
     const newTodoInput = document.getElementById('newTodoInput');
+    let blinkyboy = document.getSelection();
+    blinkyboy.removeAllRanges();
     if (newTodoInput.value === '') {
         newTodoInput.value = 'Enter a new ToDo item';
         newTodoInput.addEventListener('click', removeInputText);
@@ -392,6 +422,7 @@ const addNewToDo = (taskName) => {
 
 //Loads all the todos, sorted by project
 const viewAllTodos = () => {
+    console.log('in viewAllTodos');
     const projectListAllToDos = document.getElementById('projectListAllToDos');
     
     projectListAllToDos.removeEventListener('click', viewAllTodos);
@@ -401,6 +432,7 @@ const viewAllTodos = () => {
     
     defaultTodoListProjectName();
     defaultNewTodoInput();
+    console.log('before todoListTodosHolder');  
 
     const todoListTodosHolder = document.querySelector('#todoListTodosHolder');
     removeAllChildNodes(todoListTodosHolder);
@@ -421,10 +453,11 @@ const populateAllTodos = () => {
             const projectDivName = document.createElement('p');
             projectDivName.textContent = `${project.projectName}`;
             projectDivName.classList.add('projectDivName');
+            projectDivName.dataset.projectid = project.projectID;
             toDoListProjectDiv.appendChild(projectDivName);
             toDoListProjectDiv.insertAdjacentElement('afterbegin', projectDivName);
 
-            projectDivName.addEventListener('click', viewProject.bind());
+            projectDivName.addEventListener('click', viewProject);
         }
     })  
 }
@@ -435,7 +468,10 @@ const populateProjectToDoList = (projectName) => {
     removeAllChildNodes(todoListTodosHolder);
     
     let projectArray = toDo.allProjects.list.filter((project) => project.projectName === projectName);
-    projectArray.forEach((project) => buildToDoList(project)) 
+    projectArray.forEach((project) => {
+        buildToDoList(project)
+        buildDoneList(project)
+    }) 
 }
 
 //Creates the page elements of the todolist
@@ -450,38 +486,159 @@ const buildToDoList = (project) => {
     currentToDoList.id = `${project.projectName}ToDoList`
     toDoListProjectDiv.appendChild(currentToDoList);
     
-    project.toDoList.forEach((task) => buildTodoItem(task, project)); 
+    project.toDoList.sort((a,b) => {
+        console.log('sorting');
+        console.log(a.dueDate.substr(5, 2));
+        console.log(b.dueDate);
+        let aYear = '';
+        let bYear = '';
+        let aMonth = '';
+        let bMonth = '';
+        let aDay = '';
+        let bDay = '';
+        
+        if (a.dueDate !== 'none') {
+            a.dueDate.replace(/\//g, '-');
+            
+            aYear = format(new Date(a.dueDate), 'yyyy');
+            aMonth = format(new Date(a.dueDate), 'L');
+            aDay = format(new Date(a.dueDate), 'd');
+        }
+        if (b.dueDate !== 'none') {
+            b.dueDate.replace(/\//g, '-');
+            
+            bYear = format(new Date(b.dueDate), 'yyyy');
+            bMonth = format(new Date(b.dueDate), 'L');
+            bDay = format(new Date(b.dueDate), 'd');
+        }
+
+        if (a.priority !== b.priorty) {
+            if (a.priority === 'High') {
+                checkDate(a,b);
+            } else if (a.priority === 'Medium') {
+                if (b.priority === 'High') {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            } else if (a.priority === 'Low') {
+                if (b.priority !== 'Low' && b.priority !== 'None') {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            } else {
+                return 1;
+            }
+        }
+       
+        const checkDate = (a,b) => {
+            if (a.dueDate === 'none' || b.dueDate === 'none') {
+                if (a.dueDate === 'none') {
+                    console.log('duedatenone');
+                    return 1;
+                } else if (b.dueDate === 'none') {
+                    return -1;
+                }
+            } else if (aYear !== bYear) {
+                if (aYear < bYear) {
+                    return -1;
+                } else if (aYear > bYear) {
+                    return 1;
+                }
+            } else if (aMonth !== bMonth ) {
+                if (aMonth < bMonth) {
+                    return -1;
+                } else if (aMonth > bMonth) {
+                    return 1;
+                }
+            } else if (aDay !== bDay) {
+                if (aDay < bDay) {
+                    return -1;
+                } else if (aDay < bDay) {
+                    return 1;
+                }
+            }
+        }
+        
+
+
+    }).forEach((task) => buildTodoItem(task, project)); 
+}
+
+//Creates the page elements of the todolist
+const buildDoneList = (project) => {
+    console.log('in buildDoneList');
+    const todoListTodosHolder = document.querySelector('#todoListTodosHolder');
+    const doneListProjectDiv = document.createElement('div');
+    doneListProjectDiv.id = `${project.projectName}DoneListDiv`;
+    doneListProjectDiv.classList.add('projectDoneList');
+    todoListTodosHolder.appendChild(doneListProjectDiv);
+    
+    if (project.doneList.length !== 0) {
+        const doneList = document.createElement('div');
+        doneList.id = `${project.projectName}DoneList`
+        doneListProjectDiv.appendChild(doneList);
+        
+        console.log('projectnext');
+        //Adds the finished title to the finished list
+        const projectFinishedToDoList = document.createElement('p');
+        projectFinishedToDoList.textContent = 'Finished';
+        projectFinishedToDoList.classList.add('projectDivName');
+        projectFinishedToDoList.dataset.projectid = project.projectID;
+        doneListProjectDiv.insertAdjacentElement('afterbegin', projectFinishedToDoList);
+        
+        project.doneList.forEach((task) => buildDoneItem(task, project)); 
+    }
+    
 }
 
 //Creates the todo elements
 const buildTodoItem = (task, project) => {
     console.log('in buildTodoItem');
     const currentToDoList = document.querySelector(`#${project.projectName}ToDoList`);
+    const currentDoneList = document.querySelector(`#${project.projectName}DoneList`);
     
+
     const currentTodo = document.createElement('div');
     currentTodo.classList.add('todo', `todoPriority${task.priority}`);
     currentTodo.dataset.todoid = task.todoID;
     
+    
+    
+    const todoCheckBox = document.createElement('img');
+    todoCheckBox.classList.add('todoCheckBox');
+    todoCheckBox.src = '../src/images/icons/checkboxUncheckedIcon.svg';
+    currentTodo.appendChild(todoCheckBox);
+
+    todoCheckBox.addEventListener('mouseover', hoverCheckedIcon);
+    todoCheckBox.addEventListener('click', completeToDo);
+
     const todoMain = document.createElement('div');
     todoMain.classList.add('todoMain');
     currentTodo.appendChild(todoMain);
+
     
+
     const todoText = document.createElement('p');
     todoText.classList.add('todoText');
     todoText.textContent = task.title;
     todoMain.appendChild(todoText);
     
+
+    //Adds a toDo's dueDate to its task list
     const dueDate = task.dueDate;
-    if (!dueDate === 'none') {
-        // const currentDate = format(new Date(), 'MM/dd/yyyy');
-        // console.log(currentDate);
-        // const dueDate = document.createElement('p');
-        // dueDate.classList.add('todoText', 'todoDueDate');
-        // dueDate.textContent = currentDate;
-        // currentTodo.appendChild(dueDate);
+    if (dueDate !== 'none') {
+        console.log(task.dueDate);
+        const currentDate = format(new Date(task.dueDate), 'MM/dd/yyyy');
+        console.log(currentDate);
+        const toDoDueDate = document.createElement('p');
+        toDoDueDate.classList.add('todoText', 'todoDueDate');
+        toDoDueDate.textContent = currentDate;
+        currentTodo.appendChild(toDoDueDate);
     }
+
     const removeX = document.createElement('p');
-    //removeX.src = '../src/images/icons/removeX.svg';
     removeX.textContent = 'X';
     removeX.classList.add('removeX');
     currentTodo.appendChild(removeX);
@@ -491,24 +648,186 @@ const buildTodoItem = (task, project) => {
     todoMain.addEventListener('click', populateToDoInformation);
 } 
 
+const sortToDoList = (toDo1, toDo2) => {
+
+}
+
+//Creates the todo elements
+const buildDoneItem = (task, project) => {
+    console.log('in buildDoneItem');
+    const currentDoneList = document.querySelector(`#${project.projectName}DoneList`);
+    
+    const currentTodo = document.createElement('div');
+    currentTodo.classList.add('todo', 'todoPriorityNone');
+    currentTodo.dataset.todoid = task.todoID;
+    task.priority = 'None';
+    
+    const todoCheckBox = document.createElement('img');
+    todoCheckBox.classList.add('todoCheckBox');
+    todoCheckBox.src = '../src/images/icons/checkboxCheckedIcon.svg';
+    todoCheckBox.style.opacity = '40%';
+    currentTodo.appendChild(todoCheckBox);
+
+    todoCheckBox.addEventListener('mouseover', hoverDoneUncheckedIcon);
+    todoCheckBox.addEventListener('click', incompleteToDo);
+
+    const todoMain = document.createElement('div');
+    todoMain.classList.add('todoMain');
+    currentTodo.appendChild(todoMain);
+
+    const todoText = document.createElement('p');
+    todoText.classList.add('todoText', 'todoDoneText');
+    todoText.textContent = task.title;
+    todoMain.appendChild(todoText);
+
+    const removeX = document.createElement('p');
+    removeX.textContent = 'X';
+    removeX.classList.add('removeX');
+    removeX.style.opacity = '40%';
+    currentTodo.appendChild(removeX);
+    removeX.addEventListener('click', deleteToDoItem);
+    
+    currentDoneList.appendChild(currentTodo);
+    todoMain.addEventListener('click', populateToDoInformation);
+}
+
+//Updates the toDoList
 const updateToDoList = () => {
     console.log('in updateToDoList');
     const todoListTodosHolder = document.querySelector('#todoListTodosHolder');
-    let projectType = document.querySelector('.viewingContent').classList;
-    if (projectType.contains('projectListItem')) {
-        console.log('projectListItem');
+    let projectType = '';
+    let currentProjectID = '';
+    let currentProject = '';
+    if (document.querySelector('.viewingContent').id === 'projectListAllToDos') {
+        projectType = 'AllTodos';
+    } else {
+        projectType = 'individualProject';
+        currentProjectID = document.querySelector('.viewingContent').id;
+        console.log('getting currentProject');
+        currentProject = getProject(currentProjectID);
+        currentProject = currentProject.projectName;
+        console.log(currentProject);
+    }
+    
+    console.log(projectType);
+    console.log(currentProjectID);
+    console.log('by currentProject');
+    
+    
+    if (projectType === 'individualProject') {
+        console.log('individualProject');
         removeAllChildNodes(todoListTodosHolder);
+        console.log('prepopproject');
+        console.log(currentProject);
         populateProjectToDoList(currentProject);
-    } else if (projectType.contains('sideBarList')) {
-        console.log('sideBarList');
+    } else if (projectType === 'AllTodos') {
+        console.log('AllTodos');
         removeAllChildNodes(todoListTodosHolder);
+        console.log('prepop');
         populateAllTodos();
     }
 
 }
 
+
+//Bookmark
 const deleteToDoItem = (event) => {
-    console.log(event);
+    console.log('delete');
+    const toDoID = event.target.parentNode.dataset.todoid;
+    const currentToDo = getToDo(toDoID);
+    const currentProject = currentToDo.project;
+
+    currentProject.toDoList.forEach((toDoItem, index, list) => {
+        if (toDoItem === currentToDo) {
+            console.log(toDoItem);
+            console.log(index);
+            list.splice(index, 1);
+        }
+    })
+    
+    console.log(currentProject);
+    console.log(toDo.allProjects.list);
+    toDo.toDoList.updateList();
+    console.log('allTodos:');
+    console.log(toDo.allTodos.list);
+    
+    updateToDoList();
+    populateToDoInformation();
+}
+
+const completeToDo = (event) => {
+    console.log('in completeToDo');
+    const toDoID = event.target.parentNode.dataset.todoid;
+    console.log(toDoID);
+
+    const currentToDo = getToDo(toDoID);
+    const currentProject = currentToDo.project;
+    console.log(currentProject);
+
+    currentToDo.state = 'done';
+    currentProject.toDoList.forEach((task, index, array) => {
+        if (task.state === 'done') {
+            currentProject.doneList.push(task);
+            array.splice(index, 1);
+        }
+    })
+    console.log(currentProject);
+
+    updateToDoList();
+    populateToDoInformation();
+}
+
+const incompleteToDo = (event) => {
+    console.log('in completeToDo');
+    const toDoID = event.target.parentNode.dataset.todoid;
+    console.log(toDoID);
+
+    const currentToDo = getToDo(toDoID);
+    const currentProject = currentToDo.project;
+    console.log(currentProject);
+
+    currentToDo.state = 'notDone';
+    currentProject.doneList.forEach((task, index, array) => {
+        if (task.state === 'notDone') {
+            currentProject.toDoList.push(task);
+            array.splice(index, 1);
+        }
+    })
+    console.log(currentProject);
+
+    updateToDoList();
+    populateToDoInformation();
+}
+
+const hoverCheckedIcon = (event) => {
+    console.log('hovercheck');
+    const todoCheckBox = event.target;
+    todoCheckBox.src = '../src/images/icons/checkboxCheckedIcon.svg';
+    todoCheckBox.removeEventListener('mouseleave', hoverUncheckedIcon);
+    todoCheckBox.addEventListener('mouseleave', hoverUncheckedIcon);
+}
+const hoverUncheckedIcon = (event) => {
+    const todoCheckBox = event.target;
+    todoCheckBox.src = '../src/images/icons/checkboxUncheckedIcon.svg';
+    todoCheckBox.addEventListener('mouseover', hoverCheckedIcon);
+    todoCheckBox.removeEventListener('mouseleave', hoverUncheckedIcon);
+    
+}
+
+const hoverDoneUncheckedIcon = (event) => {
+    console.log('hoverDoneUn');
+    const todoCheckBox = event.target;
+    todoCheckBox.src = '../src/images/icons/checkboxUncheckedIcon.svg';
+    todoCheckBox.removeEventListener('mouseover', hoverDoneCheckedIcon);
+    todoCheckBox.addEventListener('mouseleave', hoverDoneCheckedIcon);
+}
+
+const hoverDoneCheckedIcon = (event) => {
+    console.log('hoverDone');
+    const todoCheckBox = event.target;
+    todoCheckBox.src = '../src/images/icons/checkboxCheckedIcon.svg';
+    todoCheckBox.removeEventListener('mouseleave', hoverDoneCheckedIcon);
+    todoCheckBox.addEventListener('mouseover', hoverDoneUncheckedIcon);
 }
 
 const createTodoInformationStructure = () => {
@@ -529,6 +848,10 @@ const createTodoInformationStructure = () => {
 }
 
 const populateToDoInformation = (event) => {
+    const todoInformationHeader = document.getElementById('todoInformationHeader');
+    const todoInformationContent = document.getElementById('todoInformationContent');
+    const todoInformationFooter = document.getElementById('todoInformationFooter');
+    
     let toDoDiv = '';
     console.log('checking for .viewingInformation');
     
@@ -547,16 +870,19 @@ const populateToDoInformation = (event) => {
         viewingToDo.classList.remove('viewingInformation');
         console.log(toDoDiv);
         toDoDiv = event.target.parentNode;
-        
+    } else if (!document.querySelector('.viewingInformation') && event === undefined) {
+        console.log('no event');
+        removeAllChildNodes(todoInformationHeader);
+        removeAllChildNodes(todoInformationContent);
+        removeAllChildNodes(todoInformationFooter);
+        return;
     } else {
         toDoDiv = event.target.parentNode;
     }
     console.log('toDoDiv');
     console.log(toDoDiv);
     
-    const todoInformationHeader = document.getElementById('todoInformationHeader');
-    const todoInformationContent = document.getElementById('todoInformationContent');
-    const todoInformationFooter = document.getElementById('todoInformationFooter');
+    
     
     removeAllChildNodes(todoInformationHeader);
     removeAllChildNodes(todoInformationContent);
@@ -592,18 +918,35 @@ const populateToDoInformation = (event) => {
         <p id='priorityMark2' class='priorityMark'>!</p>
         <p id='priorityMark3' class='priorityMark'>!</p>
     </div>`;
-    todoPrioritySelectorDiv.classList.add(`currentPriority${task.priority}`);
+    todoPrioritySelectorDiv.classList.add(`currentPriority${task.priority}`, 'toDoDetailSelector');
     todoPrioritySelectorDiv.addEventListener('click', openToDoPriority);
 
     const todoDueDateSelectionDiv = document.createElement('div');
+    todoDueDateSelectionDiv.classList.add('toDoDetailSelector');
     todoDueDateSelectionDiv.id ='todoDueDateSelectionDiv';
 
     todoInformationDetails.appendChild(todoDueDateSelectionDiv);
     const todoInformationCalIcon = document.createElement('img');
     todoInformationCalIcon.id ='todoInformationCalIcon';
-    todoInformationCalIcon.src ='../src/images/icons/calIcon.svg'
-    todoDueDateSelectionDiv.appendChild(todoInformationCalIcon)
+    todoInformationCalIcon.src ='../src/images/icons/calIcon.svg';
+    todoDueDateSelectionDiv.appendChild(todoInformationCalIcon);
 
+    todoDueDateSelectionDiv.addEventListener('click', openDatePicker);
+
+    const todoInformationDueDateDiv = document.createElement('div');
+    todoInformationDueDateDiv.id ='todoInformationDueDateDiv';
+    todoInformationContent.appendChild(todoInformationDueDateDiv);
+
+    const todoInformationDueDate = document.createElement('p');
+    todoInformationDueDate.id = 'todoInformationDueDate';
+    console.log('task dueDate pre formatting');
+    console.log(task.dueDate);
+    if (task.dueDate !== 'none') {
+        todoInformationDueDate.textContent = `Due: ${format(new Date(task.dueDate), 'LLL do, yyyy')}`;
+        todoInformationDueDateDiv.appendChild(todoInformationDueDate);
+    }
+    
+    
    
     const todoInformationNotes = document.createElement('div');
     todoInformationNotes.id = 'todoInformationNotes';
@@ -631,6 +974,7 @@ const populateToDoInformation = (event) => {
     todoInformationNotesInput.addEventListener('click', openToDoNoteEditor);
 
     
+    
     const changeProjectDiv = document.createElement('div');
     changeProjectDiv.id = 'changeProjectDiv';
     console.log(task);
@@ -655,6 +999,9 @@ const openToDoPriority = () => {
 
     todoPrioritySelectorDiv.removeEventListener('click', openToDoPriority);
     todoPrioritySelectorDiv.addEventListener('click', closeToDoPriority);
+
+    const todoDueDateSelectionDiv = document.getElementById('todoDueDateSelectionDiv');
+    todoDueDateSelectionDiv.classList.add('hideToDoDetailSelector');
     todoPrioritySelectorDiv.classList.add('selectingPriority');
     todoPrioritySelectorDiv.innerHTML = 
     `<div id='prioritySelectorMarks'>
@@ -679,6 +1026,8 @@ const openToDoPriority = () => {
 const closeToDoPriority = () => {
     const todoPrioritySelectorDiv = document.querySelector('#todoPrioritySelectorDiv');
     todoPrioritySelectorDiv.classList.remove('selectingPriority');
+    const todoDueDateSelectionDiv =document.getElementById('todoDueDateSelectionDiv');
+    todoDueDateSelectionDiv.classList.remove('hideToDoDetailSelector');
     todoPrioritySelectorDiv.innerHTML = 
     `<div id='prioritySelectorMarks'>
         <p id='priorityMark1' class='priorityMark'>!</p>
@@ -755,7 +1104,81 @@ const checkIfEnterTitle = (e) => {
     }
 }
 
+const openDatePicker = () => {
+    const todoPrioritySelectorDiv = document.getElementById('todoPrioritySelectorDiv');
+    todoPrioritySelectorDiv.classList.add('hideToDoDetailSelector');
 
+    const todoDueDateSelectionDiv = document.getElementById('todoDueDateSelectionDiv');
+    todoDueDateSelectionDiv.classList.add('selectingDate');
+    todoDueDateSelectionDiv.removeEventListener('click', openDatePicker);
+    addBackgroundDiv();
+    const inputPageBackground = document.getElementById('inputPageBackground');
+    inputPageBackground.addEventListener('click', closeDatePicker);
+    console.log('in date picker');
+    
+    const dueDateInput = document.createElement('input');
+    dueDateInput.id = 'dueDateInput';
+    dueDateInput.type = 'date';
+    const toDoID = document.querySelector('.viewingInformation').dataset.todoid;
+    const currentToDo = getToDo(toDoID);
+    if (currentToDo.dueDate === 'none') {
+        dueDateInput.value = 'mm/dd/yyyy';
+    } else {
+        dueDateInput.value = currentToDo.dueDate
+    }
+    
+    todoDueDateSelectionDiv.appendChild(dueDateInput);
+
+    const submitDueDateButton = document.createElement('div');
+    submitDueDateButton.id = 'submitDueDateButton';
+    submitDueDateButton.textContent='Change Date';
+    todoDueDateSelectionDiv.appendChild(submitDueDateButton);
+
+    submitDueDateButton.addEventListener('click', updateDueDate);
+}
+
+const closeDatePicker = () => {
+    console.log('closing datePicker');
+    removeBackgroundDiv();
+    const todoPrioritySelectorDiv = document.getElementById('todoPrioritySelectorDiv');
+    todoPrioritySelectorDiv.classList.remove('hideToDoDetailSelector');
+    const todoDueDateSelectionDiv = document.getElementById('todoDueDateSelectionDiv');
+    todoDueDateSelectionDiv.classList.remove('selectingDate');
+    todoDueDateSelectionDiv.addEventListener('click', openDatePicker);
+
+    const submitDueDateButton =document.getElementById('submitDueDateButton');
+    submitDueDateButton.remove();
+    const dueDateInput = document.getElementById('dueDateInput');
+    dueDateInput.remove();
+}
+
+const updateDueDate = () => {
+    removeBackgroundDiv();
+    const dueDateInput = document.getElementById('dueDateInput');
+    let newDueDate = dueDateInput.value;
+    newDueDate = newDueDate.replace(/-/g, '/');
+
+    console.log(newDueDate);
+    const toDoID = document.querySelector('.viewingInformation').dataset.todoid;
+    const currentToDo = getToDo(toDoID);
+    console.log('new due date:');
+    console.log(newDueDate);
+    if (newDueDate === '') {
+        currentToDo.dueDate = 'none';
+    } else {
+        currentToDo.dueDate = newDueDate;
+    }
+    console.log(toDo.allTodos.list);
+    updateToDoList();
+    console.log('afterUpdate');
+    const reapplyToDoDiv = document.querySelector(`[data-todoid = '${toDoID}']`);
+    reapplyToDoDiv.classList.add('cacheView');
+    reapplyToDoDiv.classList.remove('viewingInformation');
+    console.log(reapplyToDoDiv);
+    
+    populateToDoInformation();
+
+}
 
 const openTitleEditor = () => {
     console.log('in title editor');
