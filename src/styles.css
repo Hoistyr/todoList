@@ -254,7 +254,7 @@ h1.projectListTitle:hover {
 }
 
 .todoPriorityHigh {
-    border-left: solid 3px #1FDECC;
+    border-left: solid 3px #DE1F31;
 }
 
 .todo:hover {
@@ -264,14 +264,20 @@ h1.projectListTitle:hover {
 }
 
 .todoCheckBox {
-    margin-left: 10px;
+    position: relative;
+    left: 10px;
 }
 
 .todoMain {
-    width: 100%;
+    width: 90%;
     height: 100%;
     padding: 10px;
     display: flex;
+    overflow: hidden;
+    position: relative;
+    left: 5px;
+    right: 0px;
+    padding-left: 0px;
 }
 
 .todoText {
@@ -287,10 +293,12 @@ h1.projectListTitle:hover {
     text-decoration: line-through;
 }
 
+
+
 .todoDueDate {
     text-align: end;
     width: auto;
-    margin-right: 20px;
+    margin-right: 10px;
 }
 
 .removeX {
@@ -304,6 +312,10 @@ h1.projectListTitle:hover {
     padding: 0px;
     border-bottom: solid 1.5px #cbd2d93a; 
     font-size: 1.2rem;
+}
+
+.finishedDivName {
+    color: #cbd2d973;
 }
 
 .projectDivName:hover {
@@ -343,11 +355,12 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
 #todoInformationTitle {
     background-color: transparent;
     font: inherit;
-    font-size: 1rem;
+    font-size: 3vw;
     color: inherit;
     border: solid transparent;
     text-align: center;
     width: auto;
+    overflow: hidden;
 }
 
 #todoInformationTitle:focus {
@@ -417,7 +430,8 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
     border: solid 1px #1F91DE;
 }
 #todoPrioritySelectorDiv.currentPriorityHigh {
-    border: solid 1px #1FDECC;
+    border: solid 1px #DE1F31;
+    
 }
 
 #todoPrioritySelectorDiv.selectingPriority {
@@ -485,8 +499,8 @@ h1.viewingContent:hover, p.viewingContent:hover li.viewingContent:hover {
 }
 
 #priorityHigh {
-    background-color: #1FDECC;
-    color: #202932;
+    background-color: #DE1F31;
+    color: #cbd2d9;
 }
 
 #todoDueDateSelectionDiv {

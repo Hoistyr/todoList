@@ -67,6 +67,7 @@ const projectList = (() => {
             allProjects.list.push(newProject);
         }
         
+        
         console.log(allProjects.list);
         console.log('-|-add new over-|-');
     }
@@ -120,5 +121,51 @@ const allTodos = (() => {
     }
 })();
 
+const onPageLoad = (() => {
+    console.log('logiconpageload');
+    const getStoredProjects = (() => {
+        if (window.localStorage.getItem('storageObject')) {
+            console.log('storageExists');
+            const storageObject = JSON.parse(window.localStorage.getItem('storageObject'));
+            console.log('storageObject:');
+            console.log(storageObject);
 
-export {todoItem as item, todoProject as project, buildInbox, projectList, toDoList, allProjects, allTodos}
+            if (storageObject.allProjects.length === 0) {
+                buildInbox.create();
+            }
+
+            storageObject.allProjects.forEach(project => {
+                if (allProjects.list.filter(checkProject => checkProject.projectID === project.projectID).length === 0) {
+                    const addProject = new todoProject (project.projectName);
+                    addProject.toDoList = project.toDoList;
+                    addProject.doneList = project.doneList;
+                    addProject.projectID = project.projectID;
+                    allProjects.list.push(addProject);
+                }
+                
+            })
+
+            allProjects.list.forEach(project => {
+                storageObject.allTodos.forEach(task => {
+                    if (task.projectID === project.projectID) {
+                        const addTask = new todoItem (task.title, task.dueDate, project, project.projectID, task.priority);
+                        addTask.todoID = task.todoID;
+                        addTask.notes = task.notes;
+                        addTask.state = task.state;
+                        if (addTask.state === 'done' && project.doneList.filter(task => task.todoID === addTask.todoID).length === 0) {
+                            project.doneList.push(addTask);
+                        } else if (addTask.state === 'notDone' && project.toDoList.filter(task => task.todoID === addTask.todoID).length === 0) {
+                            project.toDoList.push(addTask);
+                        }
+
+                        allTodos.list.push(addTask);
+                    }
+                })
+            })
+        } else {
+            buildInbox.create();
+        }
+    })();
+})();
+
+export {todoItem as item, todoProject as project, projectList, toDoList, allProjects, allTodos, onPageLoad}

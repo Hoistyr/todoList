@@ -150,6 +150,8 @@ const populateProjectList = () => {
     newProjectButtonHolder.appendChild(newProjectButton);
 
     newProjectButton.addEventListener('click', openNewProjectCreator);
+
+    updateLocalStorageList();
 }
 
 //Creates the structure in the sidebar to add a new project
@@ -459,7 +461,9 @@ const populateAllTodos = () => {
 
             projectDivName.addEventListener('click', viewProject);
         }
-    })  
+    })
+    
+    updateLocalStorageList();
 }
 
 //Builds the todolist with the todos from the selected project
@@ -488,8 +492,6 @@ const buildToDoList = (project) => {
     
     project.toDoList.sort((a,b) => {
         console.log('sorting');
-        console.log(a.dueDate.substr(5, 2));
-        console.log(b.dueDate);
         let aYear = '';
         let bYear = '';
         let aMonth = '';
@@ -512,9 +514,40 @@ const buildToDoList = (project) => {
             bDay = format(new Date(b.dueDate), 'd');
         }
 
-        if (a.priority !== b.priorty) {
+        console.log(a.priority);
+        console.log(b.priority);
+
+        if (a.priority === b.priority) {
+            console.log('same priority');
+            if (a.dueDate === 'none') {
+                return 1;
+            } else if (b.dueDate === 'none') {
+                return -1;
+            } else if (aYear !== bYear) {
+                if (aYear < bYear) {
+                    return -1;
+                } else if (aYear > bYear) {
+                    return 1;
+                }
+            } else if (aMonth !== bMonth ) {
+                if (aMonth < bMonth) {
+                    return -1;
+                } else if (aMonth > bMonth) {
+                    return 1;
+                }
+            } else if (aDay !== bDay) {
+                console.log('different days');
+                console.log(aDay);
+                console.log(bDay);
+                if (aDay < bDay) {
+                    return -1;
+                } else if (aDay > bDay) {
+                    return 1;
+                }
+            }
+        } else if (a.priority !== b.priorty) {
             if (a.priority === 'High') {
-                checkDate(a,b);
+                return -1;
             } else if (a.priority === 'Medium') {
                 if (b.priority === 'High') {
                     return 1;
@@ -531,38 +564,6 @@ const buildToDoList = (project) => {
                 return 1;
             }
         }
-       
-        const checkDate = (a,b) => {
-            if (a.dueDate === 'none' || b.dueDate === 'none') {
-                if (a.dueDate === 'none') {
-                    console.log('duedatenone');
-                    return 1;
-                } else if (b.dueDate === 'none') {
-                    return -1;
-                }
-            } else if (aYear !== bYear) {
-                if (aYear < bYear) {
-                    return -1;
-                } else if (aYear > bYear) {
-                    return 1;
-                }
-            } else if (aMonth !== bMonth ) {
-                if (aMonth < bMonth) {
-                    return -1;
-                } else if (aMonth > bMonth) {
-                    return 1;
-                }
-            } else if (aDay !== bDay) {
-                if (aDay < bDay) {
-                    return -1;
-                } else if (aDay < bDay) {
-                    return 1;
-                }
-            }
-        }
-        
-
-
     }).forEach((task) => buildTodoItem(task, project)); 
 }
 
@@ -583,11 +584,12 @@ const buildDoneList = (project) => {
         console.log('projectnext');
         //Adds the finished title to the finished list
         const projectFinishedToDoList = document.createElement('p');
-        projectFinishedToDoList.textContent = 'Finished';
-        projectFinishedToDoList.classList.add('projectDivName');
+        projectFinishedToDoList.textContent = '\u2228 Finished';
+        projectFinishedToDoList.classList.add('projectDivName', 'finishedDivName');
         projectFinishedToDoList.dataset.projectid = project.projectID;
         doneListProjectDiv.insertAdjacentElement('afterbegin', projectFinishedToDoList);
         
+        projectFinishedToDoList.addEventListener('click', hideDoneList);
         project.doneList.forEach((task) => buildDoneItem(task, project)); 
     }
     
@@ -646,9 +648,20 @@ const buildTodoItem = (task, project) => {
     
     currentToDoList.appendChild(currentTodo);
     todoMain.addEventListener('click', populateToDoInformation);
+
+    updateLocalStorageList();
 } 
 
-const sortToDoList = (toDo1, toDo2) => {
+const hideDoneList = () => {
+    const projectDivName = document.querySelector('.finishedDivName');
+    projectDivName.removeEventListener('click',  hideDoneList);
+    projectDivName.addEventListener('click',  updateToDoList);
+    projectDivName.textContent = `> Finished`;
+    const projectID = document.querySelector('.viewingContent').id;
+    const projectName = getProject(projectID).projectName;
+    const projectDoneList = document.getElementById(`${projectName}DoneList`);
+    console.log(projectDoneList);
+    removeAllChildNodes(projectDoneList);
 
 }
 
@@ -660,7 +673,6 @@ const buildDoneItem = (task, project) => {
     const currentTodo = document.createElement('div');
     currentTodo.classList.add('todo', 'todoPriorityNone');
     currentTodo.dataset.todoid = task.todoID;
-    task.priority = 'None';
     
     const todoCheckBox = document.createElement('img');
     todoCheckBox.classList.add('todoCheckBox');
@@ -689,6 +701,8 @@ const buildDoneItem = (task, project) => {
     
     currentDoneList.appendChild(currentTodo);
     todoMain.addEventListener('click', populateToDoInformation);
+
+    updateLocalStorageList();
 }
 
 //Updates the toDoList
@@ -726,11 +740,9 @@ const updateToDoList = () => {
         console.log('prepop');
         populateAllTodos();
     }
-
+    updateLocalStorageList();
 }
 
-
-//Bookmark
 const deleteToDoItem = (event) => {
     console.log('delete');
     const toDoID = event.target.parentNode.dataset.todoid;
@@ -991,6 +1003,7 @@ const populateToDoInformation = (event) => {
     if (allProjectsLengthCheck.length !== 0) {
         changeProjectDiv.addEventListener('click', openProjectSelector);
     }
+    updateLocalStorageList();
 }
 
 const openToDoPriority = () => {
@@ -1347,5 +1360,51 @@ const updateProject = (event) => {
     console.log(reapplyToDoDiv);
     populateToDoInformation();
 }
+
+
+
+const updateLocalStorageList = () => {
+    console.log('in updatelocalstorage');
+    let storageObject = {
+        allProjects: [],
+        allTodos: [],
+    };
+    window.localStorage.getItem('storageObject')
+        const toDoCopier = (task) => {
+            console.log('in copier');
+            const toDoCopy = {};
+            toDoCopy.title = task.title;
+            toDoCopy.dueDate = task.dueDate;
+            toDoCopy.project = '';
+            toDoCopy.projectID = task.projectID;
+            toDoCopy.priority = task.priority;
+            toDoCopy.todoID = task.todoID;
+            toDoCopy.notes = task.notes;
+            toDoCopy.state = task.state;
+            if (storageObject.allTodos.filter(checkTask => checkTask.todoID === task.todoID).length === 0) {
+                console.log('no match found in copier')
+                storageObject.allTodos.push(toDoCopy);
+            }
+        }
+        toDo.allTodos.list.forEach(task => toDoCopier(task))
+        console.log(storageObject.allTodos);
+        
+        const projectCopier = (project) => {
+            console.log('in [projectcopier');
+            const projectCopy = {};
+            projectCopy.projectName = project.projectName;
+            projectCopy.toDoList = [];
+            projectCopy.doneList = [];
+            projectCopy.projectID = project.projectID;
+            if (storageObject.allProjects.filter(checkProject => checkProject.projectID === project.projectID ).length === 0) {
+                console.log('no match found in copier')
+                storageObject.allProjects.push(projectCopy);
+            }
+        }
+        toDo.allProjects.list.forEach(project => projectCopier(project))
+        console.log(storageObject.allProjects);
+        
+        window.localStorage.setItem('storageObject', JSON.stringify(storageObject));
+    }
 
 export { createIninitalPageStructure }

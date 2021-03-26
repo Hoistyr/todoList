@@ -1,7 +1,7 @@
 import * as pageLoad from './pageLoad.js';
 import * as toDo from './todoLogic.js'
 
-toDo.buildInbox.create();
+toDo.onPageLoad;
 pageLoad.onPageLoad.buildPageLayout();
 console.log('All Todos:');
 console.log(toDo.allTodos.list);
