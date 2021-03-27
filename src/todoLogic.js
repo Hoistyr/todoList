@@ -125,10 +125,7 @@ const onPageLoad = (() => {
     console.log('logiconpageload');
     const getStoredProjects = (() => {
         if (window.localStorage.getItem('storageObject')) {
-            console.log('storageExists');
             const storageObject = JSON.parse(window.localStorage.getItem('storageObject'));
-            console.log('storageObject:');
-            console.log(storageObject);
 
             if (storageObject.allProjects.length === 0) {
                 buildInbox.create();

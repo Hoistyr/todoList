@@ -127,9 +127,22 @@ const populateProjectList = () => {
         sideBarProject.classList.add('projectListItem');
         sideBarProject.id = `${project.projectID}`;
         
-        sideBarProject.textContent = `${project.projectName}`;
         projectList.appendChild(sideBarProject);
-        sideBarProject.addEventListener('click', viewProject);
+        
+        const sideBarProjectText = document.createElement('p');
+        sideBarProjectText.classList.add('sideBarProjectText');
+        sideBarProjectText.textContent = `${project.projectName}`;
+        sideBarProjectText.addEventListener('click', viewProject);
+        sideBarProject.appendChild(sideBarProjectText);
+        if (project.projectName !== 'Inbox') {
+            const sideBarProjectRemoveX = document.createElement('p');
+            sideBarProjectRemoveX.classList.add('sideBarProjectRemoveX');
+            sideBarProjectRemoveX.textContent = 'X';
+            sideBarProjectRemoveX.dataset.projectid = project.projectID;
+            sideBarProject.appendChild(sideBarProjectRemoveX);
+            sideBarProjectRemoveX.addEventListener('click', removeProject);
+        }
+        
     })
 
     console.log('pre cachetoview');
@@ -137,7 +150,10 @@ const populateProjectList = () => {
     if (cachedProjectID !== '' && cachedProjectID !== 'projectListAllToDos') {
         const viewedProject = document.getElementById(`${cachedProjectID}`);
         console.log(viewedProject);
-        viewProject(viewedProject);
+        // ! Breaks here
+        if (viewedProject !== null) {
+            viewProject(viewedProject);
+        }
     }
 
     const newProjectButtonHolder = document.createElement('li');
@@ -152,6 +168,32 @@ const populateProjectList = () => {
     newProjectButton.addEventListener('click', openNewProjectCreator);
 
     updateLocalStorageList();
+}
+
+const removeProject = (event) => {
+    console.log('in removeProject');
+    console.log(event);
+    console.log('after event');
+    const projectID = event.target.parentNode.id;
+    const currentProject = getProject(projectID);
+
+    toDo.allProjects.list.forEach((project, index, array) => {
+        if (projectID === project.projectID) {
+            toDo.allProjects.list.splice(index, 1);
+            toDo.toDoList.updateList();
+        }
+    })
+    
+    console.log('rp ppl');
+    populateProjectList();
+    console.log('rp vat');
+    viewAllTodos();
+    console.log('rp ulsl');
+    updateLocalStorageList();
+    console.log('rp utdl');
+    updateToDoList();
+    console.log('rp ptdi');
+    populateToDoInformation();
 }
 
 //Creates the structure in the sidebar to add a new project
@@ -180,9 +222,13 @@ const openNewProjectCreator = () => {
 const addNewProject = () => {
     const projectName = getNewProjectValue();
     console.log(projectName);
-    let newProject = new toDo.project(projectName);
-    console.log(newProject);
-    toDo.projectList.addNew(newProject);
+    if (projectName === '' || projectName === 'Enter project name') {
+        return;
+    } else {
+        let newProject = new toDo.project(projectName);
+        console.log(newProject);
+        toDo.projectList.addNew(newProject);
+    }
     
     populateProjectList();
 }
@@ -216,8 +262,7 @@ const getNewProjectValue = () => {
 const viewProject = (projectClicked) => {
     console.log('in viewProject');
     console.log(projectClicked);
-    console.log(projectClicked.id);
-    //console.log(projectClicked.target.dataset.projectid);
+
     let projectDiv = '';
     if (projectClicked.id === undefined) {
         if (projectClicked.target !== undefined && projectClicked.target.dataset.projectid !== undefined) {
@@ -226,6 +271,9 @@ const viewProject = (projectClicked) => {
             let projectID = projectClicked.target.dataset.projectid;
             projectDiv = document.getElementById(`${projectID}`);
             console.log(projectDiv);
+        } else if (projectClicked.target.classList.contains('sideBarProjectText')) {
+            console.log('contains sbtext');
+            projectDiv = projectClicked.target.parentNode;
         } else {
             projectDiv = projectClicked.target;
         }
@@ -239,8 +287,15 @@ const viewProject = (projectClicked) => {
 
     resetViewingContent();
     changeViewingContent(projectDiv);
-    updateToDoNavProjectName();
-    updateToDoNavInputText(projectDiv.textContent);
+
+    if (projectClicked.target !== undefined) {
+        updateToDoNavProjectName(projectClicked.target.textContent);
+        updateToDoNavInputText(projectClicked.target.textContent);
+    } else {
+        updateToDoNavProjectName(projectClicked.textContent);
+        updateToDoNavInputText(projectClicked.textContent);
+    }
+    
     populateProjectToDoList(projectDiv.textContent);
     
 }
@@ -271,13 +326,23 @@ const populateTodoListNav = () => {
 
     hamburgerNavIcon.addEventListener('click', hideProjectSideList);
     
+    let currentSideBarSelection = document.querySelector('.viewingContent');
+    console.log('currentSideBarSelection');
+    console.log(currentSideBarSelection);
+    
     const todoListProjectName = document.createElement('h1');
     todoListProjectName.id = 'todoListProjectName';
-    
-    const currentSideBarSelection = document.querySelector('.viewingContent').textContent;
-
-    todoListProjectName.textContent = currentSideBarSelection;
     todoListNav.appendChild(todoListProjectName);
+
+    if (currentSideBarSelection.id === 'projectListAllToDos') {
+        todoListProjectName.textContent = currentSideBarSelection.textContent;
+    } else {
+        const projectID = currentSideBarSelection.id;
+        const project = getProject(projectID);
+        todoListProjectName.textContent = project.projectName;
+    }
+    
+    
 
     const newTodoInput = document.createElement('input');
     newTodoInput.id = 'newTodoInput';
@@ -321,18 +386,16 @@ const changeViewingContent = (projectToView) => {
 }
 
 //Changes the name of the project in the todoListNav
-const updateToDoNavProjectName = () => {
+const updateToDoNavProjectName = (projectName) => {
     const todoListProjectName = document.getElementById('todoListProjectName');
-    const currentSideBarSelection = document.querySelector('.viewingContent').textContent;
-    todoListProjectName.textContent = currentSideBarSelection;
+    todoListProjectName.textContent = projectName;
 }
 
 //
 const updateToDoNavInputText = (projectName) => {
     const newTodoInput = document.getElementById('newTodoInput');
-    const currentSideBarSelection = document.querySelector('.viewingContent').textContent;
     
-    newTodoInput.defaultValue = `Enter a new ToDo item in ${currentSideBarSelection}`;
+    newTodoInput.defaultValue = `Enter a new ToDo item in ${projectName}`;
 }
 
 //Removes the default text in the new task input
@@ -398,6 +461,9 @@ const addNewToDo = (taskName) => {
     
     if (currentProject === `All ToDo's`) {
         currentProject = 'Inbox';
+    } else {
+        const projectID = document.querySelector('.viewingContent').id;
+        currentProject = getProject(projectID).projectName;
     }
     console.log(currentProject);
 
@@ -448,7 +514,7 @@ const populateAllTodos = () => {
         buildToDoList(project);
 
         if (project.toDoList.length !== 0) {
-            const toDoListProjectDiv = document.querySelector(`#${project.projectName}ListDiv`);
+            const toDoListProjectDiv = document.getElementById(`${project.projectName}ListDiv`);
             toDoListProjectDiv.classList.add('projectToDoList');
             console.log(toDoListProjectDiv);
             
@@ -598,15 +664,14 @@ const buildDoneList = (project) => {
 //Creates the todo elements
 const buildTodoItem = (task, project) => {
     console.log('in buildTodoItem');
-    const currentToDoList = document.querySelector(`#${project.projectName}ToDoList`);
-    const currentDoneList = document.querySelector(`#${project.projectName}DoneList`);
+    console.log(task);
+    console.log(project);
+    const currentToDoList = document.getElementById(`${project.projectName}ToDoList`);
+    const currentDoneList = document.getElementById(`${project.projectName}DoneList`);
     
-
     const currentTodo = document.createElement('div');
     currentTodo.classList.add('todo', `todoPriority${task.priority}`);
     currentTodo.dataset.todoid = task.todoID;
-    
-    
     
     const todoCheckBox = document.createElement('img');
     todoCheckBox.classList.add('todoCheckBox');
@@ -619,8 +684,6 @@ const buildTodoItem = (task, project) => {
     const todoMain = document.createElement('div');
     todoMain.classList.add('todoMain');
     currentTodo.appendChild(todoMain);
-
-    
 
     const todoText = document.createElement('p');
     todoText.classList.add('todoText');
@@ -1371,7 +1434,6 @@ const updateLocalStorageList = () => {
     };
     window.localStorage.getItem('storageObject')
         const toDoCopier = (task) => {
-            console.log('in copier');
             const toDoCopy = {};
             toDoCopy.title = task.title;
             toDoCopy.dueDate = task.dueDate;
@@ -1382,7 +1444,6 @@ const updateLocalStorageList = () => {
             toDoCopy.notes = task.notes;
             toDoCopy.state = task.state;
             if (storageObject.allTodos.filter(checkTask => checkTask.todoID === task.todoID).length === 0) {
-                console.log('no match found in copier')
                 storageObject.allTodos.push(toDoCopy);
             }
         }
@@ -1390,14 +1451,12 @@ const updateLocalStorageList = () => {
         console.log(storageObject.allTodos);
         
         const projectCopier = (project) => {
-            console.log('in [projectcopier');
             const projectCopy = {};
             projectCopy.projectName = project.projectName;
             projectCopy.toDoList = [];
             projectCopy.doneList = [];
             projectCopy.projectID = project.projectID;
             if (storageObject.allProjects.filter(checkProject => checkProject.projectID === project.projectID ).length === 0) {
-                console.log('no match found in copier')
                 storageObject.allProjects.push(projectCopy);
             }
         }
